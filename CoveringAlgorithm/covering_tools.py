@@ -31,22 +31,22 @@ def extract_rules_from_tree(tree: Union[DecisionTreeClassifier, DecisionTreeRegr
         if dt.feature[node] != _tree.TREE_UNDEFINED:
             # If
             new_cond = rt.RuleConditions([features[dt.feature[node]]],
-                                           [dt.feature[node]],
-                                           bmin=[xmin[dt.feature[node]]],
-                                           bmax=[dt.threshold[node]],
-                                           xmin=[xmin[dt.feature[node]]],
-                                           xmax=[xmax[dt.feature[node]]])
+                                         [dt.feature[node]],
+                                         bmin=[xmin[dt.feature[node]]],
+                                         bmax=[dt.threshold[node]],
+                                         xmin=[xmin[dt.feature[node]]],
+                                         xmax=[xmax[dt.feature[node]]])
             if cond is not None:
                 if dt.feature[node] not in cond.features_index:
                     conditions_list = list(map(lambda c1, c2: c1 + c2, cond.get_attr(),
                                                new_cond.get_attr()))
                     
                     new_cond = rt.RuleConditions(features_name=conditions_list[0],
-                                                   features_index=conditions_list[1],
-                                                   bmin=conditions_list[2],
-                                                   bmax=conditions_list[3],
-                                                   xmax=conditions_list[5],
-                                                   xmin=conditions_list[4])
+                                                 features_index=conditions_list[1],
+                                                 bmin=conditions_list[2],
+                                                 bmax=conditions_list[3],
+                                                 xmax=conditions_list[5],
+                                                 xmin=conditions_list[4])
                 else:
                     new_bmax = dt.threshold[node]
                     new_cond = copy.deepcopy(cond)
@@ -63,21 +63,21 @@ def extract_rules_from_tree(tree: Union[DecisionTreeClassifier, DecisionTreeRegr
             
             # Else
             new_cond = rt.RuleConditions([features[dt.feature[node]]],
-                                           [dt.feature[node]],
-                                           bmin=[dt.threshold[node]],
-                                           bmax=[xmax[dt.feature[node]]],
-                                           xmin=[xmin[dt.feature[node]]],
-                                           xmax=[xmax[dt.feature[node]]])
+                                         [dt.feature[node]],
+                                         bmin=[dt.threshold[node]],
+                                         bmax=[xmax[dt.feature[node]]],
+                                         xmin=[xmin[dt.feature[node]]],
+                                         xmax=[xmax[dt.feature[node]]])
             if cond is not None:
                 if dt.feature[node] not in cond.features_index:
                     conditions_list = list(map(lambda c1, c2: c1 + c2, cond.get_attr(),
                                                new_cond.get_attr()))
                     new_cond = rt.RuleConditions(features_name=conditions_list[0],
-                                                   features_index=conditions_list[1],
-                                                   bmin=conditions_list[2],
-                                                   bmax=conditions_list[3],
-                                                   xmax=conditions_list[5],
-                                                   xmin=conditions_list[4])
+                                                 features_index=conditions_list[1],
+                                                 bmin=conditions_list[2],
+                                                 bmax=conditions_list[3],
+                                                 xmax=conditions_list[5],
+                                                 xmin=conditions_list[4])
                 else:
                     new_bmin = dt.threshold[node]
                     new_bmax = xmax[dt.feature[node]]
@@ -153,9 +153,9 @@ def extract_rules_rulefit(rules: pd.DataFrame,
             xmin += [bmin_list[feat_id]]
         
         new_cond = rt.RuleConditions(features_name=features_name,
-                                       features_index=features_index,
-                                       bmin=bmin, bmax=bmax,
-                                       xmin=xmin, xmax=xmax)
+                                     features_index=features_index,
+                                     bmin=bmin, bmax=bmax,
+                                     xmin=xmin, xmax=xmax)
         new_rg = rt.Rule(copy.deepcopy(new_cond))
         rule_list.append(new_rg)
     
@@ -195,72 +195,6 @@ def select_rs(rs: Union[List[rt.Rule], rt.RuleSet],
             selected_rs = copy.deepcopy(new_rs)
     
     return selected_rs
-
-
-def get_norule(rs: rt.RuleSet, X: np.ndarray, y: np.ndarray) -> rt.Rule:
-    """
-    Return the two smallest rule of CP1 that cover all none covered
-    positive and negative points
-    
-    Parameters
-    ----------
-    rs: {RuleSet type}
-         A set of rules
-         
-    X: {array-like or discretized matrix, shape = [n, d]}
-        The training input samples after discretization.
-
-    y: {array-like, shape = [n]}
-    
-        The normalized target values (real numbers).
-        
-    Return
-    ------
-    neg_rule, pos_rule: {tuple type}
-                         Two rules or None
-    """
-    no_rule_act = 1 - rs.calc_activation()
-    norule = None
-    if sum(no_rule_act) > 0:
-        norule_list = get_norules_list(no_rule_act, X, y)
-        
-        if len(norule_list) > 0:
-            norule = norule_list[0]
-            for rg in norule_list[1:]:
-                conditions_list = norule.intersect_conditions(rg)
-                new_conditions = rt.RuleConditions(features_name=conditions_list[0],
-                                                     features_index=conditions_list[1],
-                                                     bmin=conditions_list[2],
-                                                     bmax=conditions_list[3],
-                                                     xmax=conditions_list[5],
-                                                     xmin=conditions_list[4])
-                norule = rt.Rule(new_conditions)
-    
-    return norule
-
-
-def get_norules_list(no_rule_act, X, y):
-    norule_list = []
-    for i in range(X.shape[1]):
-        try:
-            sub_x = X[:, i].astype('float')
-        except ValueError:
-            sub_x = None
-        
-        if sub_x is not None:
-            sub_no_rule_act = no_rule_act[~np.isnan(sub_x)]
-            sub_x = sub_x[~np.isnan(sub_x)][sub_no_rule_act]
-            sub_x = np.extract(sub_no_rule_act, sub_x)
-            
-            norule = rt.Rule(rt.RuleConditions(bmin=[sub_x.min()],
-                                                   bmax=[sub_x.max()],
-                                                   features_name=[''],
-                                                   features_index=[i],
-                                                   xmax=[sub_x.max()],
-                                                   xmin=[sub_x.min()]))
-            norule_list.append(norule)
-    
-    return norule_list
 
 
 def get_significant(rules_list, ymean, beta, gamma, sigma2):
@@ -311,25 +245,9 @@ def add_insignificant_rules(rules_list, rs, epsilon, sigma2, gamma):
     return selected_rs
 
 
-def add_norule(rs, y, X, features=None):
-    new_rs = copy.deepcopy(rs)
-    if rs.calc_coverage() < 1.0:
-        no_rule = get_norule(copy.deepcopy(rs), X, y)
-        
-        if no_rule is not None:
-            id_feature = no_rule.conditions.get_param('features_index')
-            if features is not None:
-                rule_features = list(itemgetter(*id_feature)(features))
-                no_rule.conditions.set_params(features_name=rule_features)
-            no_rule.calc_stats(y=y, x=X, cov_min=0.0, cov_max=1.1)
-            new_rs.append(no_rule)
-    
-    return new_rs
-
-
-def find_covering(rules_list, X, y, sigma2=None,
+def find_covering(rules_list, x, y, sigma2=None,
                   alpha=1. / 2 - 1 / 100,
-                  gamma=0.95, features=None):
+                  gamma=0.95):
     
     n_train = len(y)
     cov_min = n_train ** (-alpha)
@@ -356,7 +274,7 @@ def find_covering(rules_list, X, y, sigma2=None,
                                               epsilon, sigma2, gamma)
         
         if selected_rs.calc_coverage() < 1.0:
-            new_rs = extend_bounds(selected_rs, X, y, np.mean(y),
+            new_rs = extend_bounds(selected_rs, x, y, np.mean(y),
                                    sigma2, beta, epsilon)
         else:
             # print('No norule added')
@@ -369,12 +287,12 @@ def find_covering(rules_list, X, y, sigma2=None,
     return significant_selected_rs, selected_rs, new_rs
 
 
-def extend_bounds(rs, X, y, ymean, sigma2, beta, epsilon):
-    def dist(l, u, x):
-        if x < l:
-            return l - x
-        elif x > u:
-            return x - u
+def extend_bounds(rs, x, y, ymean, sigma2, beta, epsilon):
+    def dist(low, up, x):
+        if x < low:
+            return low - x
+        elif x > up:
+            return x - up
         else:
             return 0
     
@@ -382,11 +300,11 @@ def extend_bounds(rs, X, y, ymean, sigma2, beta, epsilon):
         aa = rule.conditions.features_index
         bmin = rule.conditions.bmin
         bmax = rule.conditions.bmax
-        return [dist(l, u, z) for l, u, z in zip(bmin, bmax, x[aa])]
+        return [dist(low, up, z) for low, up, z in zip(bmin, bmax, x[aa])]
 
-    no_act = 1 - rs.calc_activation(X)
+    no_act = 1 - rs.calc_activation(x)
     ids = np.where(no_act == 1)[0]
-    temp = [[calc_dist(rule, x) for rule in rs] for x in X[ids, :]]
+    temp = [[calc_dist(rule, x) for rule in rs] for x in x[ids, :]]
     temp2 = [[sum(t) for t in temp[i]] for i in range(len(temp))]
 
     t = np.zeros(len(temp[0]))
@@ -410,7 +328,7 @@ def extend_bounds(rs, X, y, ymean, sigma2, beta, epsilon):
             bmin.append(old_bmin[j])
             bmax.append(old_bmax[j])
         else:
-            sub_x = X[ids, i]
+            sub_x = x[ids, i]
             x_max = max(sub_x)
             x_min = min(sub_x)
         
@@ -432,7 +350,7 @@ def extend_bounds(rs, X, y, ymean, sigma2, beta, epsilon):
     new_rule.conditions.bmin = bmin
     new_rule.conditions.bmax = bmax
     
-    new_rule.calc_stats(y=y, x=X, cov_min=0.0, cov_max=1.1)
+    new_rule.calc_stats(y=y, x=x, cov_min=0.0, cov_max=1.1)
     
     left_term = beta * abs(ymean - new_rule.pred)
     right_term = math.sqrt(max(0, new_rule.var - sigma2))
@@ -584,7 +502,7 @@ def change_rs(rs, bins, xmax, xmin):
                 if bmin[i] > 0:
                     bmin[i] = bins[v][int(bmin[i] - 1)]
                 else:
-                    if v == 'X0':
+                    if v == 'x0':
                         bmin[i] = xmin[0]
                     else:
                         bmin[i] = xmin[1]
@@ -592,7 +510,7 @@ def change_rs(rs, bins, xmax, xmin):
                 if bmax[i] < len(bins[v]):
                     bmax[i] = bins[v][int(bmax[i])]
                 else:
-                    if v == 'X1':
+                    if v == 'x1':
                         bmax[i] = xmax[0]
                     else:
                         bmax[i] = xmax[1]

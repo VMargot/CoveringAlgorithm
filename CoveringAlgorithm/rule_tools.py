@@ -1,3 +1,296 @@
+import operator
+import functools
+from collections import Counter
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import scipy.spatial.distance as scipy_dist
+from sklearn.metrics import accuracy_score, r2_score
+
+
+def dist(u, v):
+    """
+    Compute the distance between two prediction vector
+
+    Parameters
+    ----------
+    u,v : {array type}
+          A predictor vector. It means a sparse array with two
+          different values 0, if the rule is not active
+          and the prediction is the rule is active.
+
+    Return
+    ------
+    Distance between u and v
+    """
+    assert len(u) == len(v), \
+        'The two array must have the same length'
+    u = np.sign(u)
+    v = np.sign(v)
+    num = np.dot(u, v)
+    deno = min(np.dot(u, u),
+               np.dot(v, v))
+    return 1 - num / deno
+
+
+def mse_function(prediction_vector, y):
+    """
+    Compute the mean squared error
+    "$ \\dfrac{1}{n} \\Sigma_{i=1}^{n} (\\hat{y}_i - y_i)^2 $"
+
+    Parameters
+    ----------
+    prediction_vector : {array type}
+                A predictor vector. It means a sparse array with two
+                different values ymean, if the rule is not active
+                and the prediction is the rule is active.
+
+    y : {array type}
+        The real target values (real numbers)
+
+    Return
+    ------
+    criterion : {float type}
+           the mean squared error
+    """
+    assert len(prediction_vector) == len(y), \
+        'The two array must have the same length'
+    error_vector = prediction_vector - y
+    criterion = np.nanmean(error_vector ** 2)
+    return criterion
+
+
+def mae_function(prediction_vector, y):
+    """
+    Compute the mean absolute error
+    "$ \\dfrac{1}{n} \\Sigma_{i=1}^{n} |\\hat{y}_i - y_i| $"
+
+    Parameters
+    ----------
+    prediction_vector : {array type}
+                A predictor vector. It means a sparse array with two
+                different values ymean, if the rule is not active
+                and the prediction is the rule is active.
+
+    y : {array type}
+        The real target values (real numbers)
+
+    Return
+    ------
+    criterion : {float type}
+           the mean absolute error
+    """
+    assert len(prediction_vector) == len(y), \
+        'The two array must have the same length'
+    error_vect = np.abs(prediction_vector - y)
+    criterion = np.nanmean(error_vect)
+    return criterion
+
+
+def aae_function(prediction_vector, y):
+    """
+    Compute the mean squared error
+    "$ \\dfrac{1}{n} \\Sigma_{i=1}^{n} (\\hat{y}_i - y_i)$"
+
+    Parameters
+    ----------
+    prediction_vector : {array type}
+                A predictor vector. It means a sparse array with two
+                different values ymean, if the rule is not active
+                and the prediction is the rule is active.
+
+    y : {array type}
+        The real target values (real numbers)
+
+    Return
+    ------
+    criterion : {float type}
+           the mean squared error
+    """
+    assert len(prediction_vector) == len(y), \
+        'The two array must have the same length'
+    error_vector = np.mean(np.abs(prediction_vector - y))
+    median_error = np.mean(np.abs(y - np.median(y)))
+    return error_vector / median_error
+
+
+def make_condition(rule):
+    """
+    Evaluate all suitable rules (i.e satisfying all criteria)
+    on a given feature.
+    Parameters
+    ----------
+    rule : {rule type}
+           A rule
+
+    Return
+    ------
+    conditions_str : {str type}
+                     A new string for the condition of the rule
+    """
+    conditions = rule.get_param('conditions').get_attr()
+    length = rule.get_param('length')
+    conditions_str = ''
+    for i in range(length):
+        if i > 0:
+            conditions_str += ' & '
+
+        conditions_str += conditions[0][i]
+        if conditions[2][i] == conditions[3][i]:
+            conditions_str += ' = '
+            conditions_str += str(conditions[2][i])
+        else:
+            conditions_str += r' $\in$ ['
+            conditions_str += str(conditions[2][i])
+            conditions_str += ', '
+            conditions_str += str(conditions[3][i])
+            conditions_str += ']'
+
+    return conditions_str
+
+
+def calc_coverage(vect):
+    """
+    Compute the coverage rate of an activation vector
+
+    Parameters
+    ----------
+    vect : {array type}
+           A activation vector. It means a sparse array with two
+           different values 0, if the rule is not active
+           and the 1 is the rule is active.
+
+    Return
+    ------
+    cov : {float type}
+          The coverage rate
+    """
+    u = np.sign(vect)
+    return np.dot(u, u) / float(u.size)
+
+
+def calc_prediction(activation_vector, y):
+    """
+    Compute the empirical conditional expectation of y
+    knowing x
+
+    Parameters
+    ----------
+    activation_vector : {array type}
+                  A activation vector. It means a sparse array with two
+                  different values 0, if the rule is not active
+                  and the 1 is the rule is active.
+
+    y : {array type}
+        The target values (real numbers)
+
+    Return
+    ------
+    predictions : {float type}
+           The empirical conditional expectation of y
+           knowing x
+    """
+    y_cond = np.extract(activation_vector != 0, y)
+    if sum(~np.isnan(y_cond)) == 0:
+        return 0
+    else:
+        predictions = np.nanmean(y_cond)
+        return predictions
+
+
+def calc_variance(activation_vector, y):
+    """
+    Compute the empirical conditional expectation of y
+    knowing x
+
+    Parameters
+    ----------
+    activation_vector : {array type}
+                  A activation vector. It means a sparse array with two
+                  different values 0, if the rule is not active
+                  and the 1 is the rule is active.
+
+    y : {array type}
+        The target values (real numbers)
+
+    Return
+    ------
+    cond_var : {float type}
+               The empirical conditional variance of y
+               knowing x
+    """
+    # cov = calc_coverage(activation_vector)
+    # y_cond = activation_vector * y
+    # cond_var = 1. / cov * (np.mean(y_cond ** 2) - 1. / cov * np.mean(y_cond) ** 2)
+    sub_y = np.extract(activation_vector, y)
+    cond_var = np.var(sub_y)
+
+    return cond_var
+
+
+def calc_criterion(prediction_vector, y, method='mse'):
+    """
+    Compute the criteria
+
+    Parameters
+    ----------
+    prediction_vector : {array type}
+                A predictor vector. It means a sparse array with two
+                different values ymean, if the rule is not active
+                and the prediction is the rule is active.
+
+    y : {array type}
+        The real target values (real numbers)
+
+    method : {string type}
+             The method mse_function or mse_function criterion
+
+    Return
+    ------
+    criterion : {float type}
+           Criteria value
+    """
+    y_fillna = np.nan_to_num(y)
+
+    if method == 'mse':
+        criterion = mse_function(prediction_vector, y_fillna)
+
+    elif method == 'mae':
+        criterion = mae_function(prediction_vector, y_fillna)
+
+    elif method == 'aae':
+        criterion = aae_function(prediction_vector, y_fillna)
+
+    else:
+        raise 'Method %s unknown' % method
+
+    return criterion
+
+
+def get_variables_count(ruleset):
+    """
+    Get a counter of all different features in the ruleset
+
+    Parameters
+    ----------
+    ruleset : {ruleset type}
+             A set of rules
+
+    Return
+    ------
+    count : {Counter type}
+            Counter of all different features in the ruleset
+    """
+    col_varuleset = [rule.conditions.get_param('features_name')
+                     for rule in ruleset]
+    varuleset_list = functools.reduce(operator.add, col_varuleset)
+    count = Counter(varuleset_list)
+
+    count = count.most_common()
+    return count
+
+
 class RuleConditions(object):
     """
     Class for binary rule condition
@@ -68,7 +361,7 @@ class RuleConditions(object):
         to_hash = frozenset(to_hash)
         return hash(to_hash)
 
-    def transform(self, X):
+    def transform(self, x):
         """
         Transform a matrix xmat into an activation vector.
         It means an array of 0 and 1. 0 if the condition is not
@@ -76,7 +369,7 @@ class RuleConditions(object):
 
         Parameters
         ----------
-        X: {array-like matrix, shape=(n_samples, n_features)}
+        x: {array-like matrix, shape=(n_samples, n_features)}
               Input data
 
         Returns
@@ -90,7 +383,7 @@ class RuleConditions(object):
         not_nan = True
         for i in range(length):
             col_index = self.features_index[i]
-            x_col = X[:, col_index]
+            x_col = x[:, col_index]
 
             # Turn x_col to array
             if len(x_col) > 1:
@@ -231,7 +524,7 @@ class Rule(object):
         """
         return self.get_param('length') + rule.get_param('length') == length
 
-    def intersect_test(self, rule, X):
+    def intersect_test(self, rule, x):
         """
         Test to know if a rule (self) and an other (rule)
         could be intersected.
@@ -241,16 +534,16 @@ class Rule(object):
         Test 3: self and rule have not included activation
         """
         if self.test_variables(rule) is False:
-            return self.test_included(rule=rule, x=X)
+            return self.test_included(rule=rule, x=x)
         else:
             return None
 
-    def union_test(self, activation, gamma=0.80, X=None):
+    def union_test(self, activation, gamma=0.80, x=None):
         """
         Test to know if a rule (self) and an activation vector have
         at more gamma percent of points in common
         """
-        self_vect = self.get_activation(X)
+        self_vect = self.get_activation(x)
         intersect_vect = np.logical_and(self_vect, activation)
 
         pts_inter = np.sum(intersect_vect)
@@ -274,7 +567,7 @@ class Rule(object):
 
         return conditions
 
-    def intersect(self, rule, cov_min, cov_max, X, low_memory):
+    def intersect(self, rule, cov_min, cov_max, x, low_memory):
         """
         Compute a suitable rule object from the intersection of an rule
         (self) and an other (rulessert).
@@ -282,7 +575,7 @@ class Rule(object):
         """
         new_rule = None
         # if self.get_param('pred') * rule.get_param('pred') > 0:
-        activation = self.intersect_test(rule, X)
+        activation = self.intersect_test(rule, x)
         if activation is not None:
             cov = calc_coverage(activation)
             if cov_min <= cov <= cov_max:
@@ -389,7 +682,7 @@ class Rule(object):
             Test samples.
 
         y : array-like, shape = (n_samples) or (n_samples, n_outputs)
-            True values for X.
+            True values for x.
 
         sample_weight : array-like, shape = [n_samples], optional
             Sample weights.
@@ -399,12 +692,12 @@ class Rule(object):
         Returns
         -------
         score : float
-            R^2 of self.predict(X) wrt. y in R.
+            R^2 of self.predict(x) wrt. y in R.
 
             or
 
         score : float
-            Mean accuracy of self.predict(X) wrt. y in {0,1}
+            Mean accuracy of self.predict(x) wrt. y in {0,1}
         """
         prediction_vector = self.predict(x)
 
@@ -747,7 +1040,7 @@ class RuleSet(object):
 
     def predict(self, y_train, x_train, x_test):
         """
-        Computes the prediction vector for a given X and a given aggregation method
+        Computes the prediction vector for a given x and a given aggregation method
         """
         prediction_vector, bad_cells, no_rules = self.calc_pred(y_train, x_train, x_test)
         return prediction_vector, bad_cells, no_rules
@@ -832,36 +1125,6 @@ class RuleSet(object):
         return f
 
     """------   Getters   -----"""
-    def get_candidates(self, X, k, length, method, nb_jobs):
-        candidates = []
-        for l in [1, length - 1]:
-            rs_length_l = self.extract_length(l)
-            if method == 'cluter':
-                if all(map(lambda rule: hasattr(rule, 'cluster'),
-                           rs_length_l)) is False:
-                    clusters = find_cluster(rs_length_l,
-                                            X, k, nb_jobs)
-                    self.set_rules_cluster(clusters, l)
-
-                rules_list = []
-                for i in range(k):
-                    sub_rs = rs_length_l.extract('cluster', i)
-                    if len(sub_rs) > 0:
-                        sub_rs.sort_by('var', True)
-                        rules_list.append(sub_rs[0])
-
-            elif method == 'best':
-                rs_length_l.sort_by('crit', False)
-                rules_list = rs_length_l[:k]
-
-            else:
-                print('Choose a method among [cluster, best] to select candidat')
-                rules_list = rs_length_l.rules
-
-            candidates.append(RuleSet(rules_list))
-
-        return candidates[0], candidates[1]
-
     def get_rules_param(self, param):
         """
         To get the list of a parameter param of the rules in self
