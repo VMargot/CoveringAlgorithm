@@ -5,12 +5,12 @@ from distutils.core import setup
 with open('requirements.txt') as f:
     requirements = f.read().splitlines()
     
-setup(name='RICE',
+setup(name='CoveringAlgorithm',
       version='1.0',
-      description='RICE algorithm',
+      description='Covering Algorithm',
       author='Vincent Margot',
       author_email='vincent.margot@hotmail.fr',
       url='',
-      packages=['RICE'],
+      packages=['CoveringAlgorithm'],
       install_requires=requirements,
       )
