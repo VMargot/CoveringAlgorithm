@@ -1,7 +1,6 @@
 import copy
 import math
-from typing import Tuple, List, Union
-from operator import itemgetter
+from typing import List, Union
 
 import numpy as np
 import pandas as pd
@@ -11,18 +10,17 @@ import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib import patches
 
-import rule_tools as rt
-
-
-def inter(rs: Union[rt.RuleSet, List[rt.Rule]]) -> int:
-    return sum(map(lambda r: r.length, rs))
+from CoveringAlgorithm import functions as f
+from CoveringAlgorithm.ruleset import RuleSet
+from CoveringAlgorithm.rule import Rule
+from CoveringAlgorithm.ruleconditions import RuleConditions
 
 
 def extract_rules_from_tree(tree: Union[DecisionTreeClassifier, DecisionTreeRegressor],
                             features: List[str],
                             xmin: List[float],
                             xmax: List[float],
-                            get_leaf: bool = False) -> List[rt.Rule]:
+                            get_leaf: bool = False) -> List[Rule]:
     dt = tree.tree_
     
     def visitor(node, depth, cond=None, rule_list=None):
@@ -30,31 +28,31 @@ def extract_rules_from_tree(tree: Union[DecisionTreeClassifier, DecisionTreeRegr
             rule_list = []
         if dt.feature[node] != _tree.TREE_UNDEFINED:
             # If
-            new_cond = rt.RuleConditions([features[dt.feature[node]]],
-                                         [dt.feature[node]],
-                                         bmin=[xmin[dt.feature[node]]],
-                                         bmax=[dt.threshold[node]],
-                                         xmin=[xmin[dt.feature[node]]],
-                                         xmax=[xmax[dt.feature[node]]])
+            new_cond = RuleConditions([features[dt.feature[node]]],
+                                      [dt.feature[node]],
+                                      bmin=[xmin[dt.feature[node]]],
+                                      bmax=[dt.threshold[node]],
+                                      xmin=[xmin[dt.feature[node]]],
+                                      xmax=[xmax[dt.feature[node]]])
             if cond is not None:
                 if dt.feature[node] not in cond.features_index:
                     conditions_list = list(map(lambda c1, c2: c1 + c2, cond.get_attr(),
                                                new_cond.get_attr()))
                     
-                    new_cond = rt.RuleConditions(features_name=conditions_list[0],
-                                                 features_index=conditions_list[1],
-                                                 bmin=conditions_list[2],
-                                                 bmax=conditions_list[3],
-                                                 xmax=conditions_list[5],
-                                                 xmin=conditions_list[4])
+                    new_cond = RuleConditions(features_name=conditions_list[0],
+                                              features_index=conditions_list[1],
+                                              bmin=conditions_list[2],
+                                              bmax=conditions_list[3],
+                                              xmax=conditions_list[5],
+                                              xmin=conditions_list[4])
                 else:
                     new_bmax = dt.threshold[node]
                     new_cond = copy.deepcopy(cond)
                     place = cond.features_index.index(dt.feature[node])
                     new_cond.bmax[place] = min(new_bmax, new_cond.bmax[place])
             
-            # print (rt.Rule(new_cond))
-            new_rg = rt.Rule(copy.deepcopy(new_cond))
+            # print (Rule(new_cond))
+            new_rg = Rule(copy.deepcopy(new_cond))
             if get_leaf is False:
                 rule_list.append(new_rg)
             
@@ -62,22 +60,22 @@ def extract_rules_from_tree(tree: Union[DecisionTreeClassifier, DecisionTreeRegr
                                 new_cond, rule_list)
             
             # Else
-            new_cond = rt.RuleConditions([features[dt.feature[node]]],
-                                         [dt.feature[node]],
-                                         bmin=[dt.threshold[node]],
-                                         bmax=[xmax[dt.feature[node]]],
-                                         xmin=[xmin[dt.feature[node]]],
-                                         xmax=[xmax[dt.feature[node]]])
+            new_cond = RuleConditions([features[dt.feature[node]]],
+                                      [dt.feature[node]],
+                                      bmin=[dt.threshold[node]],
+                                      bmax=[xmax[dt.feature[node]]],
+                                      xmin=[xmin[dt.feature[node]]],
+                                      xmax=[xmax[dt.feature[node]]])
             if cond is not None:
                 if dt.feature[node] not in cond.features_index:
                     conditions_list = list(map(lambda c1, c2: c1 + c2, cond.get_attr(),
                                                new_cond.get_attr()))
-                    new_cond = rt.RuleConditions(features_name=conditions_list[0],
-                                                 features_index=conditions_list[1],
-                                                 bmin=conditions_list[2],
-                                                 bmax=conditions_list[3],
-                                                 xmax=conditions_list[5],
-                                                 xmin=conditions_list[4])
+                    new_cond = RuleConditions(features_name=conditions_list[0],
+                                              features_index=conditions_list[1],
+                                              bmin=conditions_list[2],
+                                              bmax=conditions_list[3],
+                                              xmax=conditions_list[5],
+                                              xmin=conditions_list[4])
                 else:
                     new_bmin = dt.threshold[node]
                     new_bmax = xmax[dt.feature[node]]
@@ -86,15 +84,15 @@ def extract_rules_from_tree(tree: Union[DecisionTreeClassifier, DecisionTreeRegr
                     new_cond.bmin[place] = max(new_bmin, new_cond.bmin[place])
                     new_cond.bmax[place] = max(new_bmax, new_cond.bmax[place])
             
-            # print (rt.Rule(new_cond))
-            new_rg = rt.Rule(copy.deepcopy(new_cond))
+            # print (Rule(new_cond))
+            new_rg = Rule(copy.deepcopy(new_cond))
             if get_leaf is False:
                 rule_list.append(new_rg)
             
             rule_list = visitor(dt.children_right[node], depth + 1, new_cond, rule_list)
 
         elif get_leaf:
-            rule_list.append(rt.Rule(copy.deepcopy(cond)))
+            rule_list.append(Rule(copy.deepcopy(cond)))
 
         return rule_list
     
@@ -105,7 +103,7 @@ def extract_rules_from_tree(tree: Union[DecisionTreeClassifier, DecisionTreeRegr
 def extract_rules_rulefit(rules: pd.DataFrame,
                           features: List[str],
                           bmin_list: List[float],
-                          bmax_list: List[float]) -> List[rt.Rule]:
+                          bmax_list: List[float]) -> List[Rule]:
     rule_list = []
     
     for rule in rules['rule'].values:
@@ -152,26 +150,26 @@ def extract_rules_rulefit(rules: pd.DataFrame,
             xmax += [bmax_list[feat_id]]
             xmin += [bmin_list[feat_id]]
         
-        new_cond = rt.RuleConditions(features_name=features_name,
-                                     features_index=features_index,
-                                     bmin=bmin, bmax=bmax,
-                                     xmin=xmin, xmax=xmax)
-        new_rg = rt.Rule(copy.deepcopy(new_cond))
+        new_cond = RuleConditions(features_name=features_name,
+                                  features_index=features_index,
+                                  bmin=bmin, bmax=bmax,
+                                  xmin=xmin, xmax=xmax)
+        new_rg = Rule(copy.deepcopy(new_cond))
         rule_list.append(new_rg)
     
     return rule_list
 
 
-def select_rs(rs: Union[List[rt.Rule], rt.RuleSet],
+def select_rs(rs: Union[List[Rule], RuleSet],
               gamma: float = 1.0,
-              selected_rs: rt.RuleSet = None) -> rt.RuleSet:
+              selected_rs: RuleSet = None) -> RuleSet:
     """
     Returns a subset of a given rs. This subset is seeking by
     minimization/maximization of the criterion on the training set
     """
     # Then optimization
     if selected_rs is None or len(selected_rs) == 0:
-        selected_rs = rt.RuleSet(rs[:1])
+        selected_rs = RuleSet(rs[:1])
         id_rule = 1
     else:
         id_rule = 0
@@ -208,14 +206,14 @@ def get_significant(rules_list, ymean, beta, gamma, sigma2):
     [rule.set_params(significant=True) for rule in significant_rules]
     
     # print('Nb of significant rules', len(significant_rules))
-    significant_rs = rt.RuleSet(significant_rules)
+    significant_rs = RuleSet(significant_rules)
     # print('Coverage rate of significant rule:', significant_rs.calc_coverage())
     
     significant_rs.sort_by(crit='cov', maximized=True)
     if len(significant_rs) > 0:
         significant_selected_rs = select_rs(rs=significant_rs, gamma=gamma)
     else:
-        significant_selected_rs = rt.RuleSet([])
+        significant_selected_rs = RuleSet([])
     
     return significant_selected_rs
 
@@ -228,7 +226,7 @@ def add_insignificant_rules(rules_list, rs, epsilon, sigma2, gamma):
                                 rules_list)
     insignificant_rule = list(insignificant_rule)
     # print('Nb of insignificant rules', len(insignificant_rule))
-    insignificant_rs = rt.RuleSet(insignificant_rule)
+    insignificant_rs = RuleSet(insignificant_rule)
     # print('Coverage rate of significant rule:', insignificant_rs.calc_coverage())
     [rule.set_params(significant=False) for rule in insignificant_rs]
     
@@ -237,7 +235,7 @@ def add_insignificant_rules(rules_list, rs, epsilon, sigma2, gamma):
         selected_rs = select_rs(rs=insignificant_rs, gamma=gamma,
                                 selected_rs=rs)
     else:
-        selected_rs = rt.RuleSet([])
+        selected_rs = RuleSet([])
     
     # print('Number of rules:', len(selected_rs))
     # print('Coverage rate of the selected RuleSet ', selected_rs.calc_coverage())
@@ -245,7 +243,7 @@ def add_insignificant_rules(rules_list, rs, epsilon, sigma2, gamma):
     return selected_rs
 
 
-def find_covering(rules_list, x, y, sigma2=None,
+def find_covering(rules_list, y, sigma2=None,
                   alpha=1. / 2 - 1 / 100,
                   gamma=0.95):
     
@@ -273,18 +271,18 @@ def find_covering(rules_list, x, y, sigma2=None,
         selected_rs = add_insignificant_rules(sub_rules_list, significant_selected_rs,
                                               epsilon, sigma2, gamma)
         
-        if selected_rs.calc_coverage() < 1.0:
-            new_rs = extend_bounds(selected_rs, x, y, np.mean(y),
-                                   sigma2, beta, epsilon)
-        else:
-            # print('No norule added')
-            new_rs = copy.copy(selected_rs)
+        # if selected_rs.calc_coverage() < 1.0:
+        #     new_rs = extend_bounds(selected_rs, x, y, np.mean(y),
+        #                            sigma2, beta, epsilon)
+        # else:
+        #     # print('No norule added')
+        #     new_rs = copy.copy(selected_rs)
     else:
         # print('Significant rules form a covering')
-        selected_rs = copy.copy(significant_selected_rs)
-        new_rs = copy.copy(significant_selected_rs)
+        selected_rs = significant_selected_rs
+        # new_rs = copy.copy(significant_selected_rs)
     
-    return significant_selected_rs, selected_rs, new_rs
+    return selected_rs
 
 
 def extend_bounds(rs, x, y, ymean, sigma2, beta, epsilon):
@@ -369,19 +367,17 @@ def extend_bounds(rs, x, y, ymean, sigma2, beta, epsilon):
     return new_rs
 
 
-def calc_pred(ruleset, y_train, x_train=None, x_test=None):
+def calc_pred(ruleset, ytrain, x):
     """
     Computes the prediction vector
     using an rule based partition
     """
     # Activation of all rules in the learning set
-    activation_matrix = np.array([rule.get_activation(x_train) for rule in ruleset])
+    activation_matrix = [rule.get_activation() for rule in ruleset]
+    activation_matrix = np.array(activation_matrix)
 
-    if x_test is None:
-        prediction_matrix = activation_matrix.T
-    else:
-        prediction_matrix = [rule.calc_activation(x_test) for rule in ruleset]
-        prediction_matrix = np.array(prediction_matrix).T
+    prediction_matrix = [rule.calc_activation(x) for rule in ruleset]
+    prediction_matrix = np.array(prediction_matrix).T
 
     no_activation_matrix = np.logical_not(prediction_matrix)
 
@@ -400,30 +396,11 @@ def calc_pred(ruleset, y_train, x_train=None, x_test=None):
     # Calculation of the binary vector for cells of the partition et each row
     cells = ((dot_activation - no_activation_vector) > 0)
 
-    # Calculation of the expectation of the complementary
-    no_act = 1 - ruleset.calc_activation(x_train)
-    no_pred = np.mean(np.extract(y_train, no_act))
-
-    # Get empty significant cells
-    significant_list = np.array(ruleset.get_rules_param('significant'), dtype=int)
-    significant_rules = np.where(significant_list == 1)[0]
-    temp = prediction_matrix[:, significant_rules]
-    nb_rules_active = temp.sum(axis=1)
-    nb_rules_active[nb_rules_active == 0] = -1
-    empty_cells = np.where(nb_rules_active == -1)[0]
-
-    # Get empty insignificant cells
-    bad_cells = np.where(np.sum(cells, axis=1) == 0)[0]
-    bad_cells = list(filter(lambda i: i not in empty_cells, bad_cells))
-
     # Calculation of the conditional expectation in each cell
-    prediction_vector = [rt.calc_prediction(act, y_train) for act in cells]
+    prediction_vector = [f.calc_prediction(act, ytrain) for act in cells]
     prediction_vector = np.array(prediction_vector)
 
-    prediction_vector[bad_cells] = no_pred
-    prediction_vector[empty_cells] = 0.0
-
-    return prediction_vector, bad_cells, empty_cells
+    return prediction_vector
     
     
 def make_condition(rule):
