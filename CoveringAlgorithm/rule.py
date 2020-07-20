@@ -149,8 +149,7 @@ class Rule(object):
 
         return new_rule
 
-    def calc_stats(self, x, y, method='mse',
-                   cov_min=0.01, cov_max=0.5, low_memory=False):
+    def calc_stats(self, x, y, method='mse'):
         """
         Calculation of all statistics of an rules
 
@@ -165,14 +164,14 @@ class Rule(object):
         method : {string type}
                  The method mse_function or msecriterion
 
-        cov_min : {float type such as 0 <= covmin <= 1}, default 0.5
-                  The minimal coverage of one rule
-
-        cov_max : {float type such as 0 <= covmax <= 1}, default 0.5
-                  The maximal coverage of one rule
-
-        low_memory : {bool type}
-                     To save activation vectors of rules
+        # cov_min : {float type such as 0 <= covmin <= 1}, default 0.5
+        #           The minimal coverage of one rule
+        #
+        # cov_max : {float type such as 0 <= covmax <= 1}, default 0.5
+        #           The maximal coverage of one rule
+        #
+        # low_memory : {bool type}
+        #              To save activation vectors of rules
 
         Return
         ------

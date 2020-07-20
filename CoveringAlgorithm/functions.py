@@ -3,6 +3,10 @@ import functools
 from collections import Counter
 import numpy as np
 
+import seaborn as sns
+import scipy.spatial.distance as scipy_dist
+import matplotlib.pyplot as plt
+
 from typing import List, Union
 from CoveringAlgorithm.ruleset import RuleSet
 from CoveringAlgorithm.rule import Rule
@@ -12,7 +16,7 @@ def inter(rs: Union[RuleSet, List[Rule]]) -> int:
     return sum(map(lambda r: r.length, rs))
 
 
-def mse_function(prediction_vector, y):
+def mse_function(prediction_vector: np.ndarray, y: np.ndarray):
     """
     Compute the mean squared error
     "$ \\dfrac{1}{n} \\Sigma_{i=1}^{n} (\\hat{y}_i - y_i)^2 $"
@@ -39,7 +43,7 @@ def mse_function(prediction_vector, y):
     return criterion
 
 
-def mae_function(prediction_vector, y):
+def mae_function(prediction_vector: np.ndarray, y: np.ndarray):
     """
     Compute the mean absolute error
     "$ \\dfrac{1}{n} \\Sigma_{i=1}^{n} |\\hat{y}_i - y_i| $"
@@ -66,7 +70,7 @@ def mae_function(prediction_vector, y):
     return criterion
 
 
-def aae_function(prediction_vector, y):
+def aae_function(prediction_vector: np.ndarray, y: np.ndarray):
     """
     Compute the mean squared error
     "$ \\dfrac{1}{n} \\Sigma_{i=1}^{n} (\\hat{y}_i - y_i)$"
@@ -93,7 +97,7 @@ def aae_function(prediction_vector, y):
     return error_vector / median_error
 
 
-def make_condition(rule):
+def make_condition(rule: Rule):
     """
     Evaluate all suitable rules (i.e satisfying all criteria)
     on a given feature.
@@ -128,7 +132,7 @@ def make_condition(rule):
     return conditions_str
 
 
-def calc_coverage(vect):
+def calc_coverage(vect: np.ndarray):
     """
     Compute the coverage rate of an activation vector
 
@@ -148,7 +152,7 @@ def calc_coverage(vect):
     return np.dot(u, u) / float(u.size)
 
 
-def calc_prediction(activation_vector, y):
+def calc_prediction(activation_vector: np.ndarray, y: np.ndarray):
     """
     Compute the empirical conditional expectation of y
     knowing x
@@ -177,7 +181,7 @@ def calc_prediction(activation_vector, y):
         return predictions
 
 
-def calc_variance(activation_vector, y):
+def calc_variance(activation_vector: np.ndarray, y: np.ndarray):
     """
     Compute the empirical conditional expectation of y
     knowing x
@@ -207,16 +211,13 @@ def calc_variance(activation_vector, y):
     return cond_var
 
 
-def calc_criterion(pred, y, method='mse'):
+def calc_criterion(pred: float, y: np.ndarray, method: str = 'mse'):
     """
     Compute the criteria
 
     Parameters
     ----------
-    prediction_vector : {array type}
-                A predictor vector. It means a sparse array with two
-                different values ymean, if the rule is not active
-                and the prediction is the rule is active.
+    pred : {float type}
 
     y : {array type}
         The real target values (real numbers)
@@ -246,7 +247,32 @@ def calc_criterion(pred, y, method='mse'):
     return criterion
 
 
-def get_variables_count(ruleset):
+def dist(u: np.ndarray, v: np.ndarray):
+    """
+    Compute the distance between two prediction vector
+
+    Parameters
+    ----------
+    u,v : {array type}
+          A predictor vector. It means a sparse array with two
+          different values 0, if the rule is not active
+          and the prediction is the rule is active.
+
+    Return
+    ------
+    Distance between u and v
+    """
+    assert len(u) == len(v), \
+        'The two array must have the same length'
+    u = np.sign(u)
+    v = np.sign(v)
+    num = np.dot(u, v)
+    deno = min(np.dot(u, u),
+               np.dot(v, v))
+    return 1 - num / deno
+
+
+def get_variables_count(ruleset: RuleSet):
     """
     Get a counter of all different features in the ruleset
 
@@ -267,3 +293,78 @@ def get_variables_count(ruleset):
 
     count = count.most_common()
     return count
+
+
+def make_selected_df(ruleset: RuleSet):
+    df = ruleset.to_df()
+
+    df.rename(columns={"Cov": "Coverage", "Pred": "Prediction",
+                       'Var': 'Variance', 'Crit': 'Criterion'},
+              inplace=True)
+
+    df['Conditions'] = [make_condition(rule) for rule in ruleset]
+    selected_df = df[['Conditions', 'Coverage',
+                      'Prediction', 'Variance',
+                      'Criterion']].copy()
+
+    selected_df['Coverage'] = selected_df.Coverage.round(2)
+    selected_df['Prediction'] = selected_df.Prediction.round(2)
+    selected_df['Variance'] = selected_df.Variance.round(2)
+    selected_df['Criterion'] = selected_df.Criterion.round(2)
+
+    return selected_df
+
+
+def plot_counter_variables(ruleset: RuleSet, nb_max: int = None):
+    counter = get_variables_count(ruleset)
+
+    x_labels = list(map(lambda item: item[0], counter))
+    values = list(map(lambda item: item[1], counter))
+
+    fig = plt.figure()
+    ax = plt.subplot()
+
+    if nb_max is not None:
+        x_labels = x_labels[:nb_max]
+        values = values[:nb_max]
+
+    g = sns.barplot(y=x_labels, x=values, ax=ax, ci=None)
+    g.set(xlim=(0, max(values) + 1), ylabel='Variable', xlabel='Count')
+
+    return fig
+
+
+def plot_dist(ruleset: RuleSet, x: np.ndarray = None):
+    rules_names = ruleset.get_rules_name()
+
+    predictions_vector_list = [rule.get_predictions_vector(x) for rule in ruleset]
+    predictions_matrix = np.array(predictions_vector_list)
+
+    distance_vector = scipy_dist.pdist(predictions_matrix, metric=dist)
+    distance_matrix = scipy_dist.squareform(distance_vector)
+
+    # Set up the matplotlib figure
+    f = plt.figure()
+    ax = plt.subplot()
+
+    # Generate a mask for the upper triangle
+    mask = np.zeros_like(distance_matrix, dtype=np.bool)
+    mask[np.triu_indices_from(mask)] = True
+
+    # Generate a custom diverging colormap
+    cmap = sns.diverging_palette(220, 10, as_cmap=True)
+
+    vmax = np.max(distance_matrix)
+    vmin = np.min(distance_matrix)
+    # center = np.mean(distance_matrix)
+
+    # Draw the heatmap with the mask and correct aspect ratio
+    sns.heatmap(distance_matrix, cmap=cmap, ax=ax,
+                vmax=vmax, vmin=vmin, center=1.,
+                square=True, xticklabels=rules_names,
+                yticklabels=rules_names, mask=mask)
+
+    plt.yticks(rotation=0)
+    plt.xticks(rotation=90)
+
+    return f

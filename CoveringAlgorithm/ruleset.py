@@ -1,37 +1,8 @@
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-import scipy.spatial.distance as scipy_dist
-
+from typing import Union, List
 from CoveringAlgorithm.rule import Rule
 from CoveringAlgorithm import functions as f
-
-
-
-def dist(u, v):
-    """
-    Compute the distance between two prediction vector
-
-    Parameters
-    ----------
-    u,v : {array type}
-          A predictor vector. It means a sparse array with two
-          different values 0, if the rule is not active
-          and the prediction is the rule is active.
-
-    Return
-    ------
-    Distance between u and v
-    """
-    assert len(u) == len(v), \
-        'The two array must have the same length'
-    u = np.sign(u)
-    v = np.sign(v)
-    num = np.dot(u, v)
-    deno = min(np.dot(u, u),
-               np.dot(v, v))
-    return 1 - num / deno
 
 
 class RuleSet(object):
@@ -83,7 +54,7 @@ class RuleSet(object):
     def __delitem__(self, rules_id):
         del self.rules[rules_id]
 
-    def append(self, rule):
+    def append(self, rule: Rule):
         """
         Add one rule to a RuleSet object (self).
         """
@@ -101,20 +72,20 @@ class RuleSet(object):
         self.rules.extend(rules_list)
         return self
 
-    def insert(self, idx, rule):
+    def insert(self, idx: int, rule: Rule):
         """
         Insert one rule to a RuleSet object (self) at the position idx.
         """
         assert rule.__class__ == Rule, 'Must be a rule object'
         self.rules.insert(idx, rule)
 
-    def pop(self, idx=None):
+    def pop(self, idx: int):
         """
         Drop the rule at the position idx.
         """
         self.rules.pop(idx)
 
-    def extract_greater(self, param, val):
+    def extract_greater(self, param: str, val: Union[float, int]):
         """
         Extract a RuleSet object from self such as each rules have a param
         greater than val.
@@ -122,7 +93,7 @@ class RuleSet(object):
         rules_list = list(filter(lambda rule: rule.get_param(param) > val, self))
         return RuleSet(rules_list)
 
-    def extract_least(self, param, val):
+    def extract_least(self, param: str, val: Union[float, int]):
         """
         Extract a RuleSet object from self such as each rules have a param
         least than val.
@@ -130,15 +101,7 @@ class RuleSet(object):
         rules_list = list(filter(lambda rule: rule.get_param(param) < val, self))
         return RuleSet(rules_list)
 
-    def extract_length(self, length):
-        """
-        Extract a RuleSet object from self such as each rules have a
-        length l.
-        """
-        rules_list = list(filter(lambda rule: rule.get_param('length') == length, self))
-        return RuleSet(rules_list)
-
-    def extract(self, param, val):
+    def extract(self, param: str, val: Union[float, int]):
         """
         Extract a RuleSet object from self such as each rules have a param
         equal to val.
@@ -146,14 +109,21 @@ class RuleSet(object):
         rules_list = list(filter(lambda rule: rule.get_param(param) == val, self))
         return RuleSet(rules_list)
 
-    def index(self, rule):
+    def extract_length(self, length: int):
+        """
+        Extract a RuleSet object from self such as each rules have a
+        length l.
+        """
+        return self.extract('length', length)
+
+    def index(self, rule: Rule):
         """
         Get the index a rule in a RuleSet object (self).
         """
         assert rule.__class__ == Rule, 'Must be a rule object'
         self.get_rules().index(rule)
 
-    def replace(self, idx, rule):
+    def replace(self, idx: int, rule: Rule):
         """
         Replace rule at position idx in a RuleSet object (self)
         by a new rule.
@@ -161,7 +131,7 @@ class RuleSet(object):
         self.rules.pop(idx)
         self.rules.insert(idx, rule)
 
-    def sort_by(self, crit, maximized):
+    def sort_by(self, crit: str, maximized: bool):
         """
         Sort the RuleSet object (self) by a criteria criterion
         """
@@ -175,7 +145,7 @@ class RuleSet(object):
         rules_list = list(set(self.rules))
         return RuleSet(rules_list)
 
-    def to_df(self, cols=None):
+    def to_df(self, cols: List[str] = None):
         """
         To transform an ruleset into a pandas DataFrame
         """
@@ -196,7 +166,8 @@ class RuleSet(object):
 
         return df
 
-    def calc_pred(self, y_train, x_train=None, x_test=None):
+    def calc_pred(self, y_train: np.ndarray, x_train: np.ndarray = None,
+                  x_test: np.ndarray = None):
         """
         Computes the prediction vector
         using an rule based partition
@@ -252,7 +223,7 @@ class RuleSet(object):
 
         return prediction_vector, bad_cells, empty_cells
 
-    def calc_activation(self, x=None):
+    def calc_activation(self, x: np.ndarray = None):
         """
         Compute the  activation vector of a set of rules
         """
@@ -262,7 +233,7 @@ class RuleSet(object):
 
         return activation_vector
 
-    def calc_coverage(self, x=None):
+    def calc_coverage(self, x: np.ndarray = None):
         """
         Compute the coverage rate of a set of rules
         """
@@ -273,7 +244,7 @@ class RuleSet(object):
             cov = 0.0
         return cov
 
-    def predict(self, y_train, x_train, x_test):
+    def predict(self, y_train: np.ndarray, x_train: np.ndarray, x_test: np.ndarray):
         """
         Computes the prediction vector for a given x and a given aggregation method
         """
@@ -287,80 +258,8 @@ class RuleSet(object):
         list(map(lambda rule, rules_id: rule.make_name(rules_id),
                  self, range(len(self))))
 
-    def make_selected_df(self):
-        df = self.to_df()
-
-        df.rename(columns={"Cov": "Coverage", "Pred": "Prediction",
-                           'Var': 'Variance', 'Crit': 'Criterion'},
-                  inplace=True)
-
-        df['Conditions'] = [f.make_condition(rule) for rule in self]
-        selected_df = df[['Conditions', 'Coverage',
-                          'Prediction', 'Variance',
-                          'Criterion']].copy()
-
-        selected_df['Coverage'] = selected_df.Coverage.round(2)
-        selected_df['Prediction'] = selected_df.Prediction.round(2)
-        selected_df['Variance'] = selected_df.Variance.round(2)
-        selected_df['Criterion'] = selected_df.Criterion.round(2)
-
-        return selected_df
-
-    def plot_counter_variables(self, nb_max=None):
-        counter = f.get_variables_count(self)
-
-        x_labels = list(map(lambda item: item[0], counter))
-        values = list(map(lambda item: item[1], counter))
-
-        fig = plt.figure()
-        ax = plt.subplot()
-
-        if nb_max is not None:
-            x_labels = x_labels[:nb_max]
-            values = values[:nb_max]
-
-        g = sns.barplot(y=x_labels, x=values, ax=ax, ci=None)
-        g.set(xlim=(0, max(values) + 1), ylabel='Variable', xlabel='Count')
-
-        return fig
-
-    def plot_dist(self, x=None, metric=dist):
-        rules_names = self.get_rules_name()
-
-        predictions_vector_list = [rule.get_predictions_vector(x) for rule in self]
-        predictions_matrix = np.array(predictions_vector_list)
-
-        distance_vector = scipy_dist.pdist(predictions_matrix, metric=metric)
-        distance_matrix = scipy_dist.squareform(distance_vector)
-
-        # Set up the matplotlib figure
-        f = plt.figure()
-        ax = plt.subplot()
-
-        # Generate a mask for the upper triangle
-        mask = np.zeros_like(distance_matrix, dtype=np.bool)
-        mask[np.triu_indices_from(mask)] = True
-
-        # Generate a custom diverging colormap
-        cmap = sns.diverging_palette(220, 10, as_cmap=True)
-
-        vmax = np.max(distance_matrix)
-        vmin = np.min(distance_matrix)
-        # center = np.mean(distance_matrix)
-
-        # Draw the heatmap with the mask and correct aspect ratio
-        sns.heatmap(distance_matrix, cmap=cmap, ax=ax,
-                    vmax=vmax, vmin=vmin, center=1.,
-                    square=True, xticklabels=rules_names,
-                    yticklabels=rules_names, mask=mask)
-
-        plt.yticks(rotation=0)
-        plt.xticks(rotation=90)
-
-        return f
-
     """------   Getters   -----"""
-    def get_rules_param(self, param):
+    def get_rules_param(self, param: str):
         """
         To get the list of a parameter param of the rules in self
         """
@@ -390,7 +289,7 @@ class RuleSet(object):
         assert type(rules_list) == list, 'Must be a list object'
         self.rules = rules_list
 
-    def set_rules_cluster(self, params, length):
+    def set_rules_cluster(self, params: str, length):
         rules_list = list(filter(lambda rule: rule.get_param('length') == length, self))
         list(map(lambda rule, rules_id: rule.set_params(cluster=params[rules_id]),
                  rules_list, range(len(rules_list))))
