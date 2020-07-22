@@ -198,8 +198,8 @@ def get_significant(rules_list, ymean, beta, gamma, sigma2):
     significant_rs = RuleSet(significant_rules)
 
     if len(significant_rs) > 0:
-        # significant_rs.sort_by(crit='cov', maximized=True)
-        significant_rs.sort_by(crit='crit', maximized=False)
+        significant_rs.sort_by(crit='cov', maximized=True)
+        # significant_rs.sort_by(crit='crit', maximized=False)
         significant_selected_rs = select_rs(rs=significant_rs, gamma=gamma)
     else:
         significant_selected_rs = RuleSet([])

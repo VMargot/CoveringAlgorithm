@@ -6,10 +6,18 @@ import numpy as np
 import seaborn as sns
 import scipy.spatial.distance as scipy_dist
 import matplotlib.pyplot as plt
+from sklearn.exceptions import NotFittedError
 
 from typing import List, Union
 from CoveringAlgorithm.ruleset import RuleSet
 from CoveringAlgorithm.rule import Rule
+
+
+def check_is_fitted(estimator):
+    if len(estimator.rule_list) == 0:
+        msg = ("This %(name)s instance is not fitted yet. Call 'fit' with "
+               "appropriate arguments before using this estimator.")
+        raise NotFittedError(msg % {'name': type(estimator).__name__})
 
 
 def inter(rs: Union[RuleSet, List[Rule]]) -> int:

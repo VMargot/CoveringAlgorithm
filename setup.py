@@ -10,7 +10,7 @@ setup(name='CoveringAlgorithm',
       description='Covering Algorithm',
       author='Vincent Margot',
       author_email='vincent.margot@hotmail.fr',
-      url='',
+      url='https://github.com/VMargot/CoveringAlgorithm',
       packages=['CoveringAlgorithm'],
       install_requires=requirements,
       )
