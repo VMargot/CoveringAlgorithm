@@ -27,6 +27,8 @@ import CoveringAlgorithm.covering_tools as ct
 
 target_dict = {'student_mat': 'G3',
                'student_por': 'G3',
+               'student_mat_easy': 'G3',
+               'student_por_easy': 'G3',
                'boston': 'MEDV',
                'bike_hour': 'cnt',
                'bike_day': 'cnt'}
@@ -45,12 +47,16 @@ def load_data(name: str):
     data: a pandas DataFrame
     """
     if 'student' in name:
-        if name == 'student_por':
+        if 'student_por' in name:
             data = pd.read_csv(join(racine_path, 'Data/Student/student-por.csv'),
                                sep=';')
-        elif name == 'student_mat':
+        elif 'student_mat' in name:
             data = pd.read_csv(join(racine_path, 'Data/Student/student-mat.csv'),
                                sep=';')
+        else:
+            raise ValueError('Not tested dataset')
+        # Covering Algorithm allow only numerical features.
+        # We can only convert binary qualitative features.
         data['sex'] = [1 if x == 'F' else 0 for x in data['sex'].values]
         data['Pstatus'] = [1 if x == 'A' else 0 for x in data['Pstatus'].values]
         data['famsize'] = [1 if x == 'GT3' else 0 for x in data['famsize'].values]
@@ -59,7 +65,10 @@ def load_data(name: str):
         data = data.replace('yes', 1)
         data = data.replace('no', 0)
 
-        data = data.drop(['G1', 'G2'], axis=1)
+        if 'easy' not in data_name:
+            # For an harder exercise drop G1 and G2
+            data = data.drop(['G1', 'G2'], axis=1)
+
     elif name == 'bike_hour':
         data = pd.read_csv(join(racine_path, 'Data/BikeSharing/hour.csv'), index_col=0)
         data = data.set_index('dteday')
@@ -78,9 +87,6 @@ def load_data(name: str):
 
 
 if __name__ == '__main__':
-    #  Data parameters
-    data_name = 'student_mat'  # 'boston' 'bike_hour' 'bike_day 'student_por' 'student_mat'
-
     seed = 42
     np.random.seed(seed)
     test_size = 0.3
@@ -96,220 +102,231 @@ if __name__ == '__main__':
     # Covering parameters
     alpha = 1. / 2 - 1 / 100.
     gamma = 0.95
-    generator_func = AdaBoostRegressor
 
-    # ## Data Generation
-    dataset = load_data(data_name)
-    target = target_dict[data_name]
-    y = dataset[target].astype('float')
-    X = dataset.drop(target, axis=1)
-    features = X.describe().columns
+    #  Data parameters
+    for data_name in [#'boston', 'bike_hour', 'bike_day', 'student_por', 'student_mat',
+                      'student_por_easy', 'student_mat_easy']:
+        # data_name = 'student_mat'  # 'boston' 'bike_hour' 'bike_day 'student_por' 'student_mat'
+        print('')
+        print('===== ', data_name.upper(), ' =====')
 
-    y = y.values
-    X = X[features].values  # To get only numerical variables
+        # ## Data Generation
+        dataset = load_data(data_name)
+        target = target_dict[data_name]
+        y = dataset[target].astype('float')
+        X = dataset.drop(target, axis=1)
+        features = X.describe().columns
 
-    # ### Splitting data
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size,
-                                                        random_state=seed)
-    if test_size == 0.0:
-        X_test = X_train
-        y_test = y_train
+        y = y.values
+        X = X[features].values  # To get only numerical variables
 
-    # Normalization of the error
-    deno_aae = np.mean(np.abs(y_test - np.median(y_test)))
-    deno_mse = np.mean((y_test - np.mean(y_test)) ** 2)
+        # ### Splitting data
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size,
+                                                            random_state=seed)
+        if test_size == 0.0:
+            X_test = X_train
+            y_test = y_train
 
-    subsample = min(0.5, (100 + 6 * np.sqrt(len(y_train))) / len(y_train))
+        # Normalization of the error
+        deno_aae = np.mean(np.abs(y_test - np.median(y_test)))
+        deno_mse = np.mean((y_test - np.mean(y_test)) ** 2)
 
-    # ## Decision Tree
-    tree = DecisionTreeRegressor(max_leaf_nodes=tree_size,
-                                 random_state=seed)
-    tree.fit(X_train, y_train)
+        subsample = min(0.5, (100 + 6 * np.sqrt(len(y_train))) / len(y_train))
 
-    tree_rules = ct.extract_rules_from_tree(tree, features, X_train.min(axis=0),
-                                            X_train.max(axis=0))
+        # ## Decision Tree
+        tree = DecisionTreeRegressor(max_leaf_nodes=tree_size,
+                                     random_state=seed)
+        tree.fit(X_train, y_train)
 
-    # dot_data = StringIO()
-    # export_graphviz(tree, out_file=dot_data,
-    #                 filled=True, rounded=True,
-    #                 special_characters=True)
-    # graph = pydotplus.graph_from_dot_data(dot_data.getvalue())
-    # graph.create_png()
+        tree_rules = ct.extract_rules_from_tree(tree, features, X_train.min(axis=0),
+                                                X_train.max(axis=0))
 
-    # ## Random Forests generation
-    regr_rf = RandomForestRegressor(n_estimators=nb_estimator,
-                                    max_leaf_nodes=tree_size,
-                                    random_state=seed)
-    regr_rf.fit(X_train, y_train)
+        # dot_data = StringIO()
+        # export_graphviz(tree, out_file=dot_data,
+        #                 filled=True, rounded=True,
+        #                 special_characters=True)
+        # graph = pydotplus.graph_from_dot_data(dot_data.getvalue())
+        # graph.create_png()
 
-    # importances = regr_rf.feature_importances_
-    # std = np.std([tree.feature_importances_ for tree in regr_rf.estimators_],
-    #              axis=0)
-    # indices = np.argsort(importances)[::-1]
+        # ## Random Forests generation
+        regr_rf = RandomForestRegressor(n_estimators=nb_estimator,
+                                        max_leaf_nodes=tree_size,
+                                        random_state=seed)
+        regr_rf.fit(X_train, y_train)
 
-    # print("Feature ranking:")
-    # for f in range(X.shape[1]):
-    #     print("%d. %s (%f)" % (f + 1, features[indices[f]], importances[indices[f]]))
+        # importances = regr_rf.feature_importances_
+        # std = np.std([tree.feature_importances_ for tree in regr_rf.estimators_],
+        #              axis=0)
+        # indices = np.argsort(importances)[::-1]
 
-    # # Plot the feature importances of the forest
-    # plt.figure()
-    # plt.title("Feature importances")
-    # plt.bar(range(X.shape[1]), importances[indices],
-    #         color="r", yerr=std[indices], align="center")
-    # plt.xticks(range(len(features)), [features[i] for i in indices])
-    # plt.xlim([-1, X.shape[1]])
-    # plt.show()
+        # print("Feature ranking:")
+        # for f in range(X.shape[1]):
+        #     print("%d. %s (%f)" % (f + 1, features[indices[f]], importances[indices[f]]))
 
-    rf_rule_list = []
-    for tree in regr_rf.estimators_:
-        rf_rule_list += ct.extract_rules_from_tree(tree, features, X_train.min(axis=0),
-                                                   X_train.max(axis=0))
+        # # Plot the feature importances of the forest
+        # plt.figure()
+        # plt.title("Feature importances")
+        # plt.bar(range(X.shape[1]), importances[indices],
+        #         color="r", yerr=std[indices], align="center")
+        # plt.xticks(range(len(features)), [features[i] for i in indices])
+        # plt.xlim([-1, X.shape[1]])
+        # plt.show()
 
-    # ## GradientBoosting
-    gb = GradientBoostingRegressor(n_estimators=nb_estimator,
-                                   max_leaf_nodes=tree_size,
-                                   learning_rate=learning_rate,
-                                   subsample=subsample,
-                                   random_state=seed)
-    gb.fit(X_train, y_train)
-    gb_rule_list = []
-    for tree in gb.estimators_:
-        gb_rule_list += ct.extract_rules_from_tree(tree[0], features, X_train.min(axis=0),
-                                                   X_train.max(axis=0))
+        rf_rule_list = []
+        for tree in regr_rf.estimators_:
+            rf_rule_list += ct.extract_rules_from_tree(tree, features, X_train.min(axis=0),
+                                                       X_train.max(axis=0))
 
-    # ## AdBoost
-    ad = AdaBoostRegressor(n_estimators=nb_estimator,
-                           learning_rate=learning_rate,
-                           random_state=seed)
-    ad.fit(X_train, y_train)
-    ad_rule_list = []
-    for tree in ad.estimators_:
-        ad_rule_list += ct.extract_rules_from_tree(tree, features, X_train.min(axis=0),
-                                                   X_train.max(axis=0))
+        # ## GradientBoosting
+        gb = GradientBoostingRegressor(n_estimators=nb_estimator,
+                                       max_leaf_nodes=tree_size,
+                                       learning_rate=learning_rate,
+                                       subsample=subsample,
+                                       random_state=seed)
+        gb.fit(X_train, y_train)
+        gb_rule_list = []
+        for tree in gb.estimators_:
+            gb_rule_list += ct.extract_rules_from_tree(tree[0], features, X_train.min(axis=0),
+                                                       X_train.max(axis=0))
 
-    # ## Covering Algorithm RandomForest
-    ca_rf = CA.CA(alpha=alpha, gamma=gamma,
-                  tree_size=tree_size,
-                  seed=seed,
-                  max_rules=max_rules,
-                  generator_func=RandomForestRegressor)
-    ca_rf.fit(X=X_train, y=y_train, features=features)
+        # ## AdBoost
+        ad = AdaBoostRegressor(n_estimators=nb_estimator,
+                               learning_rate=learning_rate,
+                               random_state=seed)
+        ad.fit(X_train, y_train)
+        ad_rule_list = []
+        for tree in ad.estimators_:
+            ad_rule_list += ct.extract_rules_from_tree(tree, features, X_train.min(axis=0),
+                                                       X_train.max(axis=0))
 
-    print('Covering Algorithm RF selected set of rules covering:',
-          ca_rf.selected_rs.calc_coverage())
+        # ## Covering Algorithm RandomForest
+        ca_rf = CA.CA(alpha=alpha, gamma=gamma,
+                      tree_size=tree_size,
+                      seed=seed,
+                      max_rules=max_rules,
+                      generator_func=RandomForestRegressor)
+        ca_rf.fit(X=X_train, y=y_train, features=features)
 
-    # ## Covering Algorithm GradientBoosting
-    ca_gb = CA.CA(alpha=alpha, gamma=gamma,
-                  tree_size=tree_size,
-                  seed=seed,
-                  max_rules=max_rules,
-                  generator_func=GradientBoostingRegressor)
-    ca_gb.fit(X=X_train, y=y_train, features=features)
+        print('Covering Algorithm RF selected set of rules covering:',
+              ca_rf.selected_rs.calc_coverage())
 
-    print('Covering Algorithm GB selected set of rules covering:',
-          ca_gb.selected_rs.calc_coverage())
+        # ## Covering Algorithm GradientBoosting
+        ca_gb = CA.CA(alpha=alpha, gamma=gamma,
+                      tree_size=tree_size,
+                      seed=seed,
+                      max_rules=max_rules,
+                      generator_func=GradientBoostingRegressor)
+        ca_gb.fit(X=X_train, y=y_train, features=features)
 
-    # ## Covering Algorithm
-    ca_ad = CA.CA(alpha=alpha, gamma=gamma,
-                  tree_size=tree_size,
-                  seed=seed,
-                  max_rules=max_rules,
-                  generator_func=AdaBoostRegressor)
-    ca_ad.fit(X=X_train, y=y_train, features=features)
+        print('Covering Algorithm GB selected set of rules covering:',
+              ca_gb.selected_rs.calc_coverage())
 
-    print('Covering Algorithm AD selected set of rules covering:',
-          ca_ad.selected_rs.calc_coverage())
+        # ## Covering Algorithm
+        ca_ad = CA.CA(alpha=alpha, gamma=gamma,
+                      tree_size=tree_size,
+                      seed=seed,
+                      max_rules=max_rules,
+                      generator_func=AdaBoostRegressor)
+        ca_ad.fit(X=X_train, y=y_train, features=features)
 
-    # ## RuleFit
-    if rulefit is not None:
-        rule_fit = rulefit.RuleFit(tree_size=tree_size,
-                                   max_rules=max_rules,
-                                   random_state=seed,
-                                   max_iter=2000)
-        rule_fit.fit(X_train, y_train)
+        print('Covering Algorithm AD selected set of rules covering:',
+              ca_ad.selected_rs.calc_coverage())
 
-        # ### RuleFit rules part
-        rules = rule_fit.get_rules()
-        rules = rules[rules.coef != 0].sort_values(by="support")
-        rules = rules.loc[rules['type'] == 'rule']
+        # ## RuleFit
+        if rulefit is not None:
+            rule_fit = rulefit.RuleFit(tree_size=tree_size,
+                                       max_rules=max_rules,
+                                       random_state=seed,
+                                       max_iter=2000)
+            rule_fit.fit(X_train, y_train)
 
-        # ### RuleFit linear part
-        lin = rule_fit.get_rules()
-        lin = lin[lin.coef != 0].sort_values(by="support")
-        lin = lin.loc[lin['type'] == 'linear']
+            # ### RuleFit rules part
+            rules = rule_fit.get_rules()
+            rules = rules[rules.coef != 0].sort_values(by="support")
+            rules = rules.loc[rules['type'] == 'rule']
 
-        rulefit_rules = ct.extract_rules_rulefit(rules, features, X_train.min(axis=0),
-                                                 X_train.max(axis=0))
-    else:
-        rule_fit = None
-        rulefit_rules = None
-        lin = None
+            # ### RuleFit linear part
+            lin = rule_fit.get_rules()
+            lin = lin[lin.coef != 0].sort_values(by="support")
+            lin = lin.loc[lin['type'] == 'linear']
 
-    # ## Errors calculation
-    pred_tree = tree.predict(X_test)
-    pred_rf = regr_rf.predict(X_test)
-    pred_gb = gb.predict(X_test)
-    pred_ad = ad.predict(X_test)
-    pred_CA_rf = ca_rf.predict(X_test)
-    pred_CA_gb = ca_gb.predict(X_test)
-    pred_CA_ad = ca_ad.predict(X_test)
-    if rule_fit is not None:
-        pred_rulefit = rule_fit.predict(X_test)
-    else:
-        pred_rulefit = None
+            rulefit_rules = ct.extract_rules_rulefit(rules, features, X_train.min(axis=0),
+                                                     X_train.max(axis=0))
+        else:
+            rule_fit = None
+            rulefit_rules = None
+            lin = None
 
-    print('Bad prediction for Covering Algorithm RF:',
-          sum([x == 0 for x in pred_CA_rf]) / len(y_test))
-    print('Bad prediction for Covering Algorithm GB:',
-          sum([x == 0 for x in pred_CA_gb]) / len(y_test))
-    print('Bad prediction for Covering Algorithm AD:',
-          sum([x == 0 for x in pred_CA_ad]) / len(y_test))
+        # ## Errors calculation
+        pred_tree = tree.predict(X_test)
+        pred_rf = regr_rf.predict(X_test)
+        pred_gb = gb.predict(X_test)
+        pred_ad = ad.predict(X_test)
+        pred_CA_rf = ca_rf.predict(X_test)
+        pred_CA_gb = ca_gb.predict(X_test)
+        pred_CA_ad = ca_ad.predict(X_test)
+        if rule_fit is not None:
+            pred_rulefit = rule_fit.predict(X_test)
+        else:
+            pred_rulefit = None
 
-    # ## Results.
-    print('Interpretability score')
-    print('Decision tree interpretability score:', func.inter(tree_rules))
-    print('Random Forest interpretability score:', func.inter(rf_rule_list))
-    print('Gradient Boosting interpretability score:', func.inter(gb_rule_list))
-    print('AdBoost interpretability score:', func.inter(ad_rule_list))
-    print('Covering Algorithm RF interpretability score:', func.inter(ca_rf.selected_rs))
-    print('Covering Algorithm GB interpretability score:', func.inter(ca_gb.selected_rs))
-    print('Covering Algorithm AB interpretability score:', func.inter(ca_ad.selected_rs))
-    if rulefit_rules is not None:
-        print('RuleFit interpretability score:', func.inter(rulefit_rules))
-        print('Linear relation:', len(lin))
+        print('Bad prediction for Covering Algorithm RF:',
+              sum([x == 0 for x in pred_CA_rf]) / len(y_test))
+        print('Bad prediction for Covering Algorithm GB:',
+              sum([x == 0 for x in pred_CA_gb]) / len(y_test))
+        print('Bad prediction for Covering Algorithm AD:',
+              sum([x == 0 for x in pred_CA_ad]) / len(y_test))
 
-    print('')
-    print('aae')
-    print('Decision Tree aae:', np.mean(np.abs(y_test - pred_tree)) / deno_aae)
-    print('Random Forest aae:', np.mean(np.abs(y_test - pred_rf)) / deno_aae)
-    print('Gradient Boosting aae:', np.mean(np.abs(y_test - pred_gb)) / deno_aae)
-    print('AdaBoost aae:', np.mean(np.abs(y_test - pred_ad)) / deno_aae)
-    print('Covering Algorithm RF aae:', np.mean(np.abs(y_test - pred_CA_rf)) / deno_aae)
-    print('Covering Algorithm GB aae:', np.mean(np.abs(y_test - pred_CA_gb)) / deno_aae)
-    print('Covering Algorithm AD aae:', np.mean(np.abs(y_test - pred_CA_ad)) / deno_aae)
-    if pred_rulefit is not None:
-        print('RuleFit aae:', np.mean(np.abs(y_test - pred_rulefit)) / deno_aae)
+        # ## Results.
+        print('')
+        print('Interpretability score')
+        print('----------------------')
+        print('Decision tree interpretability score:', func.inter(tree_rules))
+        print('Random Forest interpretability score:', func.inter(rf_rule_list))
+        print('Gradient Boosting interpretability score:', func.inter(gb_rule_list))
+        print('AdBoost interpretability score:', func.inter(ad_rule_list))
+        print('Covering Algorithm RF interpretability score:', func.inter(ca_rf.selected_rs))
+        print('Covering Algorithm GB interpretability score:', func.inter(ca_gb.selected_rs))
+        print('Covering Algorithm AB interpretability score:', func.inter(ca_ad.selected_rs))
+        if rulefit_rules is not None:
+            print('RuleFit interpretability score:', func.inter(rulefit_rules))
+            print('Linear relation:', len(lin))
 
-    print('')
-    print('MSE')
-    print('Decision Tree mse:', np.mean((y_test - pred_tree) ** 2) / deno_mse)
-    print('Random Forest mse:', np.mean((y_test - pred_rf) ** 2) / deno_mse)
-    print('Gradient Boosting mse:', np.mean((y_test - pred_gb) ** 2) / deno_mse)
-    print('AdaBoost mse:', np.mean((y_test - pred_ad) ** 2) / deno_mse)
-    print('Covering Algorithm RF mse:', np.mean((y_test - pred_CA_rf) ** 2) / deno_mse)
-    print('Covering Algorithm GB mse:', np.mean((y_test - pred_CA_gb) ** 2) / deno_mse)
-    print('Covering Algorithm AD mse:', np.mean((y_test - pred_CA_ad) ** 2) / deno_mse)
-    if pred_rulefit is not None:
-        print('RuleFit mse:', np.mean((y_test - pred_rulefit) ** 2) / deno_mse)
+        print('')
+        print('aae')
+        print('---')
+        print('Decision Tree aae:', np.mean(np.abs(y_test - pred_tree)) / deno_aae)
+        print('Random Forest aae:', np.mean(np.abs(y_test - pred_rf)) / deno_aae)
+        print('Gradient Boosting aae:', np.mean(np.abs(y_test - pred_gb)) / deno_aae)
+        print('AdaBoost aae:', np.mean(np.abs(y_test - pred_ad)) / deno_aae)
+        print('Covering Algorithm RF aae:', np.mean(np.abs(y_test - pred_CA_rf)) / deno_aae)
+        print('Covering Algorithm GB aae:', np.mean(np.abs(y_test - pred_CA_gb)) / deno_aae)
+        print('Covering Algorithm AD aae:', np.mean(np.abs(y_test - pred_CA_ad)) / deno_aae)
+        if pred_rulefit is not None:
+            print('RuleFit aae:', np.mean(np.abs(y_test - pred_rulefit)) / deno_aae)
 
-    print('')
-    print('R2 score')  # Percentage of the explained variance
-    print('Decision Tree R2 score', r2_score(y_test, pred_tree))
-    print('Random Forest R2 score', r2_score(y_test, pred_rf))
-    print('Gradient Boosting R2 score', r2_score(y_test, pred_gb))
-    print('AdaBoost R2 score', r2_score(y_test, pred_ad))
-    print('Covering Algorithm RF R2 score', r2_score(y_test, pred_CA_rf))
-    print('Covering Algorithm GB R2 score', r2_score(y_test, pred_CA_gb))
-    print('Covering Algorithm AD R2 score', r2_score(y_test, pred_CA_ad))
-    if pred_rulefit is not None:
-        print('RuleFit R2 score', r2_score(y_test, pred_rulefit))
+        print('')
+        print('MSE')
+        print('---')
+        print('Decision Tree mse:', np.mean((y_test - pred_tree) ** 2) / deno_mse)
+        print('Random Forest mse:', np.mean((y_test - pred_rf) ** 2) / deno_mse)
+        print('Gradient Boosting mse:', np.mean((y_test - pred_gb) ** 2) / deno_mse)
+        print('AdaBoost mse:', np.mean((y_test - pred_ad) ** 2) / deno_mse)
+        print('Covering Algorithm RF mse:', np.mean((y_test - pred_CA_rf) ** 2) / deno_mse)
+        print('Covering Algorithm GB mse:', np.mean((y_test - pred_CA_gb) ** 2) / deno_mse)
+        print('Covering Algorithm AD mse:', np.mean((y_test - pred_CA_ad) ** 2) / deno_mse)
+        if pred_rulefit is not None:
+            print('RuleFit mse:', np.mean((y_test - pred_rulefit) ** 2) / deno_mse)
+
+        print('')
+        print('R2 score')  # Percentage of the explained variance
+        print('--------')
+        print('Decision Tree R2 score', r2_score(y_test, pred_tree))
+        print('Random Forest R2 score', r2_score(y_test, pred_rf))
+        print('Gradient Boosting R2 score', r2_score(y_test, pred_gb))
+        print('AdaBoost R2 score', r2_score(y_test, pred_ad))
+        print('Covering Algorithm RF R2 score', r2_score(y_test, pred_CA_rf))
+        print('Covering Algorithm GB R2 score', r2_score(y_test, pred_CA_gb))
+        print('Covering Algorithm AD R2 score', r2_score(y_test, pred_CA_ad))
+        if pred_rulefit is not None:
+            print('RuleFit R2 score', r2_score(y_test, pred_rulefit))
