@@ -59,9 +59,9 @@ class CA:
         self.learning_rate = learning_rate
         self.mode = mode
         self.generator = generator_func
-        self.rule_generator = None
+        self.rules_generator = None
         self.features = []
-        self.rule_list = []
+        self.rules_list = []
         self.selected_rs = RuleSet([])
         self.y = None
 
@@ -112,27 +112,27 @@ class CA:
         nb_estimator = int(np.ceil(self.max_rules/self.tree_size))
 
         self.set_rule_generator(nb_estimator, subsample, self.mode)
-        self.rule_generator.fit(X, y)
-        self.extract_rules(x_min, x_max, self.features)
+        self.rules_generator.fit(X, y)
+        self.extract_rules(x_min, x_max)
         self.eval_rules(X, y)
         self.select_rules(y)
 
         return self
 
-    def extract_rules(self, x_min: List[float], x_max: List[float], features: List[str]):
-        if type(self.rule_generator) in [GradientBoostingRegressor, GradientBoostingClassifier]:
-            tree_list = [t[0] for t in self.rule_generator.estimators_]
+    def extract_rules(self, x_min: List[float], x_max: List[float]):
+        if type(self.rules_generator) in [GradientBoostingRegressor, GradientBoostingClassifier]:
+            tree_list = [t[0] for t in self.rules_generator.estimators_]
         else:
-            tree_list = self.rule_generator.estimators_
+            tree_list = self.rules_generator.estimators_
         for tree in tree_list:
-            self.rule_list += ct.extract_rules_from_tree(tree, features, x_min, x_max)
+            self.rules_list += ct.extract_rules_from_tree(tree, self.features, x_min, x_max)
 
     def eval_rules(self, X: np.ndarray, y: np.ndarray):
-        self.rule_list = Parallel(n_jobs=self.n_jobs, backend="multiprocessing")(
-            delayed(eval_rules)(rule, y, X) for rule in self.rule_list)
+        self.rules_list = Parallel(n_jobs=self.n_jobs, backend="multiprocessing")(
+            delayed(eval_rules)(rule, y, X) for rule in self.rules_list)
 
     def select_rules(self, y: np.ndarray):
-        sub_rulelist = list(filter(lambda rule: rule.length <= self.l_max, self.rule_list))
+        sub_rulelist = list(filter(lambda rule: rule.length <= self.l_max, self.rules_list))
         sigma = self.get_sigma(len(y))
         self.selected_rs = ct.find_covering(sub_rulelist, y, sigma,
                                             self.alpha, self.gamma)
@@ -140,45 +140,45 @@ class CA:
     def set_rule_generator(self, nb_estimator, subsample, mode):
         if self.generator is None:
             if mode.lower() in ['regression', 'reg', 'r']:
-                self.rule_generator = GradientBoostingRegressor(n_estimators=nb_estimator,
-                                                                max_leaf_nodes=self.tree_size,
-                                                                learning_rate=self.learning_rate,
-                                                                subsample=subsample,
-                                                                random_state=self.seed,
-                                                                max_depth=100)
-            elif mode.lower() in ['classification', 'classif', 'c']:
-                self.rule_generator = GradientBoostingClassifier(n_estimators=nb_estimator,
+                self.rules_generator = GradientBoostingRegressor(n_estimators=nb_estimator,
                                                                  max_leaf_nodes=self.tree_size,
                                                                  learning_rate=self.learning_rate,
                                                                  subsample=subsample,
                                                                  random_state=self.seed,
                                                                  max_depth=100)
+            elif mode.lower() in ['classification', 'classif', 'c']:
+                self.rules_generator = GradientBoostingClassifier(n_estimators=nb_estimator,
+                                                                  max_leaf_nodes=self.tree_size,
+                                                                  learning_rate=self.learning_rate,
+                                                                  subsample=subsample,
+                                                                  random_state=self.seed,
+                                                                  max_depth=100)
             else:
                 raise ValueError('Covering Algorithm only works for regression or classification.')
 
         elif self.generator in [RandomForestClassifier, RandomForestRegressor]:
-            self.rule_generator = self.generator(n_estimators=nb_estimator,
-                                                 max_leaf_nodes=self.tree_size,
-                                                 random_state=self.seed,
-                                                 max_depth=100)
+            self.rules_generator = self.generator(n_estimators=nb_estimator,
+                                                  max_leaf_nodes=self.tree_size,
+                                                  random_state=self.seed,
+                                                  max_depth=100)
         elif self.generator in [GradientBoostingRegressor, GradientBoostingClassifier]:
-            self.rule_generator = self.generator(n_estimators=nb_estimator,
-                                                 max_leaf_nodes=self.tree_size,
-                                                 learning_rate=self.learning_rate,
-                                                 subsample=subsample,
-                                                 random_state=self.seed,
-                                                 max_depth=100)
+            self.rules_generator = self.generator(n_estimators=nb_estimator,
+                                                  max_leaf_nodes=self.tree_size,
+                                                  learning_rate=self.learning_rate,
+                                                  subsample=subsample,
+                                                  random_state=self.seed,
+                                                  max_depth=100)
         elif self.generator in [AdaBoostRegressor, AdaBoostClassifier]:
-            self.rule_generator = self.generator(n_estimators=nb_estimator,
-                                                 learning_rate=self.learning_rate,
-                                                 random_state=self.seed)
+            self.rules_generator = self.generator(n_estimators=nb_estimator,
+                                                  learning_rate=self.learning_rate,
+                                                  random_state=self.seed)
         else:
             raise ValueError("Covering Algorithm only works with "
                              "RandomForest, GradientBoosting and AdBoost!")
 
     def get_sigma(self, n_train: int):
         sigma = np.nanmin([r.var if r.cov > n_train ** (-self.alpha) else np.nan
-                           for r in self.rule_list])
+                           for r in self.rules_list])
         return sigma
 
     def predict(self, X: np.ndarray, y: np.ndarray = None):

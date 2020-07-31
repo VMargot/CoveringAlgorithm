@@ -14,7 +14,7 @@ from CoveringAlgorithm.rule import Rule
 
 
 def check_is_fitted(estimator):
-    if len(estimator.rule_list) == 0:
+    if len(estimator.rules_list) == 0:
         msg = ("This %(name)s instance is not fitted yet. Call 'fit' with "
                "appropriate arguments before using this estimator.")
         raise NotFittedError(msg % {'name': type(estimator).__name__})

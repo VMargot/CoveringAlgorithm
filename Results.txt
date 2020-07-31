@@ -1,371 +1,489 @@
-=====  BOSTON  =====
+/usr/bin/python3.6 /home/vincent/PycharmProjects/CoveringAlgorithm/main.py
+
+=====  PROSTATE  =====
 Covering Algorithm RF selected set of rules covering: 1.0
-Covering Algorithm GB selected set of rules covering: 0.9971751412429378
+Covering Algorithm GB selected set of rules covering: 1.0
 Covering Algorithm AD selected set of rules covering: 1.0
-Bad prediction for Covering Algorithm RF: 0.0
-Bad prediction for Covering Algorithm GB: 0.013157894736842105
-Bad prediction for Covering Algorithm AD: 0.02631578947368421
+Bad prediction for Covering Algorithm RF: 0.13333333333333333
+Bad prediction for Covering Algorithm GB: 0.1
+Bad prediction for Covering Algorithm AD: 0.2
 
 Interpretability score
 ----------------------
 Decision tree interpretability score: 8
-Random Forest interpretability score: 4240
-Gradient Boosting interpretability score: 5236
-AdBoost interpretability score: 13504
-Covering Algorithm RF interpretability score: 6
-Covering Algorithm GB interpretability score: 12
-Covering Algorithm AB interpretability score: 9
-RuleFit interpretability score: 471
+Random Forest interpretability score: 21242
+Gradient Boosting interpretability score: 5370
+AdBoost interpretability score: 25414
+Covering Algorithm RF interpretability score: 13
+Covering Algorithm GB interpretability score: 14
+Covering Algorithm AB interpretability score: 12
+RuleFit interpretability score: 89
 Linear relation: 1
+SIRUS interpretability score: 12
+NodeHarvest interpretability score: 112
 
 aae
 ---
-Decision Tree aae: 0.8773561390764446
-Random Forest aae: 0.5255125315503267
-Gradient Boosting aae: 0.34073182324015117
-AdaBoost aae: 0.4640491640364934
-Covering Algorithm RF aae: 0.6721714028579475
-Covering Algorithm GB aae: 0.6541400455357242
-Covering Algorithm AD aae: 0.8241309079621644
-RuleFit aae: 0.35331218353689786
+Decision Tree aae: 1.018590838114899
+Random Forest aae: 0.7432245938794508
+Gradient Boosting aae: 0.8796710157327193
+AdaBoost aae: 0.779477659170628
+Covering Algorithm RF aae: 1.278948157336126
+Covering Algorithm GB aae: 1.180706443779966
+Covering Algorithm AD aae: 1.395402059774874
+RuleFit aae: 0.6711653979368637
+SIRUS aae: 0.7048527694772866
+NodeHarvest aae: 0.6890715686800502
 
 MSE
 ---
-Decision Tree mse: 0.6078322369524841
-Random Forest mse: 0.24560447871241556
-Gradient Boosting mse: 0.12173868492086887
-AdaBoost mse: 0.20286711246309297
-Covering Algorithm RF mse: 0.42031738034165816
-Covering Algorithm GB mse: 0.5297117867826638
-Covering Algorithm AD mse: 0.7348487511127193
-RuleFit mse: 0.1433259843093679
+Decision Tree mse: 0.8876087091553801
+Random Forest mse: 0.46992386247102064
+Gradient Boosting mse: 0.7206342954735366
+AdaBoost mse: 0.5376266147688906
+Covering Algorithm RF mse: 2.051256450024977
+Covering Algorithm GB mse: 1.555312651277485
+Covering Algorithm AD mse: 2.4032072239649076
+RuleFit mse: 0.4428286150512224
+SIRUS mse: 0.5113927632796843
+NodeHarvest mse: 0.46514802919682713
 
 R2 score
 --------
-Decision Tree R2 score 0.392167763047516
-Random Forest R2 score 0.7543955212875845
-Gradient Boosting R2 score 0.8782613150791312
-AdaBoost R2 score 0.797132887536907
-Covering Algorithm RF R2 score 0.5796826196583419
-Covering Algorithm GB R2 score 0.47028821321733627
-Covering Algorithm AD R2 score 0.2651512488872808
-RuleFit R2 score 0.8566740156906321
+Decision Tree R2 score 0.11239129084461985
+Random Forest R2 score 0.5300761375289793
+Gradient Boosting R2 score 0.2793657045264635
+AdaBoost R2 score 0.4623733852311094
+Covering Algorithm RF R2 score -1.0512564500249764
+Covering Algorithm GB R2 score -0.5553126512774849
+Covering Algorithm AD R2 score -1.4032072239649076
+RuleFit R2 score 0.5571713849487776
+SIRUS R2 score 0.4886072367203157
+NodeHarvest R2 score 0.5348519708031729
 
-=====  BIKE_HOUR  =====
+=====  OZONE  =====
 Covering Algorithm RF selected set of rules covering: 1.0
 Covering Algorithm GB selected set of rules covering: 1.0
 Covering Algorithm AD selected set of rules covering: 1.0
-Bad prediction for Covering Algorithm RF: 0.00019179133103183735
-Bad prediction for Covering Algorithm GB: 0.00019179133103183735
-Bad prediction for Covering Algorithm AD: 0.00019179133103183735
-
-Interpretability score
-----------------------
-Decision tree interpretability score: 6
-Random Forest interpretability score: 3000
-Gradient Boosting interpretability score: 4580
-AdBoost interpretability score: 10360
-Covering Algorithm RF interpretability score: 2
-Covering Algorithm GB interpretability score: 4
-Covering Algorithm AB interpretability score: 2
-RuleFit interpretability score: 138
-Linear relation: 2
-
-aae
----
-Decision Tree aae: 0.5228712204082018
-Random Forest aae: 0.32103874035944524
-Gradient Boosting aae: 0.021950609715554962
-AdaBoost aae: 0.15639912436566242
-Covering Algorithm RF aae: 0.5770409218439007
-Covering Algorithm GB aae: 0.4036507403701288
-Covering Algorithm AD aae: 0.4901238634518208
-RuleFit aae: 0.004746866824424754
-
-MSE
----
-Decision Tree mse: 0.210350513110344
-Random Forest mse: 0.11382128870489634
-Gradient Boosting mse: 0.0005639067490909069
-AdaBoost mse: 0.02079818427915778
-Covering Algorithm RF mse: 0.3131594968065815
-Covering Algorithm GB mse: 0.18730351164102507
-Covering Algorithm AD mse: 0.2573512648879513
-RuleFit mse: 0.0002195224599498628
-
-R2 score
---------
-Decision Tree R2 score 0.789649486889656
-Random Forest R2 score 0.8861787112951036
-Gradient Boosting R2 score 0.9994360932509091
-AdaBoost R2 score 0.9792018157208422
-Covering Algorithm RF R2 score 0.6868405031934186
-Covering Algorithm GB R2 score 0.8126964883589749
-Covering Algorithm AD R2 score 0.7426487351120488
-RuleFit R2 score 0.9997804775400502
-
-=====  BIKE_DAY  =====
-Covering Algorithm RF selected set of rules covering: 1.0
-Covering Algorithm GB selected set of rules covering: 1.0
-Covering Algorithm AD selected set of rules covering: 1.0
-Bad prediction for Covering Algorithm RF: 0.004545454545454545
-Bad prediction for Covering Algorithm GB: 0.00909090909090909
-Bad prediction for Covering Algorithm AD: 0.004545454545454545
-
-Interpretability score
-----------------------
-Decision tree interpretability score: 6
-Random Forest interpretability score: 3180
-Gradient Boosting interpretability score: 4716
-AdBoost interpretability score: 11308
-Covering Algorithm RF interpretability score: 4
-Covering Algorithm GB interpretability score: 7
-Covering Algorithm AB interpretability score: 4
-RuleFit interpretability score: 142
-Linear relation: 2
-
-aae
----
-Decision Tree aae: 0.3399183473849343
-Random Forest aae: 0.30583976454869954
-Gradient Boosting aae: 0.034560823924807145
-AdaBoost aae: 0.14466498710163664
-Covering Algorithm RF aae: 0.4415568438157613
-Covering Algorithm GB aae: 0.33396595213195185
-Covering Algorithm AD aae: 0.44623446185468796
-RuleFit aae: 0.003330914781251403
-
-MSE
----
-Decision Tree mse: 0.13121663509088327
-Random Forest mse: 0.1012524801547961
-Gradient Boosting mse: 0.0015888178731060458
-AdaBoost mse: 0.02132289688244777
-Covering Algorithm RF mse: 0.1983032310329269
-Covering Algorithm GB mse: 0.13093505282773713
-Covering Algorithm AD mse: 0.20072787777981904
-RuleFit mse: 0.0003742920189873338
-
-R2 score
---------
-Decision Tree R2 score 0.8687833649091168
-Random Forest R2 score 0.898747519845204
-Gradient Boosting R2 score 0.998411182126894
-AdaBoost R2 score 0.9786771031175522
-Covering Algorithm RF R2 score 0.8016967689670731
-Covering Algorithm GB R2 score 0.8690649471722629
-Covering Algorithm AD R2 score 0.799272122220181
-RuleFit R2 score 0.9996257079810127
-
-=====  STUDENT_POR  =====
-Covering Algorithm RF selected set of rules covering: 0.9977973568281938
-Covering Algorithm GB selected set of rules covering: 0.9933920704845814
-Covering Algorithm AD selected set of rules covering: 0.9977973568281938
-Bad prediction for Covering Algorithm RF: 0.1641025641025641
-Bad prediction for Covering Algorithm GB: 0.4461538461538462
-Bad prediction for Covering Algorithm AD: 0.441025641025641
-
-Interpretability score
-----------------------
-Decision tree interpretability score: 12
-Random Forest interpretability score: 5774
-Gradient Boosting interpretability score: 5730
-AdBoost interpretability score: 12224
-Covering Algorithm RF interpretability score: 39
-Covering Algorithm GB interpretability score: 65
-Covering Algorithm AB interpretability score: 75
-RuleFit interpretability score: 175
-Linear relation: 1
-
-aae
----
-Decision Tree aae: 1.3467008461413899
-Random Forest aae: 0.8990053768498647
-Gradient Boosting aae: 0.8996383438254508
-AdaBoost aae: 0.8820061657749766
-Covering Algorithm RF aae: 1.6221381098149525
-Covering Algorithm GB aae: 2.6900977831357578
-Covering Algorithm AD aae: 2.7076868981932276
-RuleFit aae: 0.875721174930395
-
-MSE
----
-Decision Tree mse: 1.611937996250647
-Random Forest mse: 0.7815302728362556
-Gradient Boosting mse: 0.7266679828452416
-AdaBoost mse: 0.7308497740911319
-Covering Algorithm RF mse: 3.1766779435484347
-Covering Algorithm GB mse: 6.644112986821904
-Covering Algorithm AD mse: 6.520171775132731
-RuleFit mse: 0.7357514961517603
-
-R2 score
---------
-Decision Tree R2 score -0.611937996250647
-Random Forest R2 score 0.21846972716374435
-Gradient Boosting R2 score 0.2733320171547584
-AdaBoost R2 score 0.26915022590886806
-Covering Algorithm RF R2 score -2.1766779435484347
-Covering Algorithm GB R2 score -5.644112986821904
-Covering Algorithm AD R2 score -5.52017177513273
-RuleFit R2 score 0.26424850384823984
-
-=====  STUDENT_MAT  =====
-Covering Algorithm RF selected set of rules covering: 1.0
-Covering Algorithm GB selected set of rules covering: 1.0
-Covering Algorithm AD selected set of rules covering: 0.9927536231884058
-Bad prediction for Covering Algorithm RF: 0.11764705882352941
-Bad prediction for Covering Algorithm GB: 0.7815126050420168
-Bad prediction for Covering Algorithm AD: 0.680672268907563
+Bad prediction for Covering Algorithm RF: 0.020202020202020204
+Bad prediction for Covering Algorithm GB: 0.030303030303030304
+Bad prediction for Covering Algorithm AD: 0.030303030303030304
 
 Interpretability score
 ----------------------
 Decision tree interpretability score: 10
-Random Forest interpretability score: 5518
-Gradient Boosting interpretability score: 5672
-AdBoost interpretability score: 4054
-Covering Algorithm RF interpretability score: 38
-Covering Algorithm GB interpretability score: 62
-Covering Algorithm AB interpretability score: 97
-RuleFit interpretability score: 350
+Random Forest interpretability score: 24244
+Gradient Boosting interpretability score: 25222
+AdBoost interpretability score: 76128
+Covering Algorithm RF interpretability score: 7
+Covering Algorithm GB interpretability score: 8
+Covering Algorithm AB interpretability score: 8
+RuleFit interpretability score: 950
 Linear relation: 0
+SIRUS interpretability score: 13
+NodeHarvest interpretability score: 154
 
 aae
 ---
-Decision Tree aae: 1.1679746461255356
-Random Forest aae: 0.9200236868356803
-Gradient Boosting aae: 0.9992451055669971
-AdaBoost aae: 0.9524139028379397
-Covering Algorithm RF aae: 0.9390908021641967
-Covering Algorithm GB aae: 2.4779816513761475
-Covering Algorithm AD aae: 2.131753312945974
-RuleFit aae: 0.9207490855454947
+Decision Tree aae: 0.7826431052280217
+Random Forest aae: 0.544233943100133
+Gradient Boosting aae: 0.44888596219435334
+AdaBoost aae: 0.5134491473688865
+Covering Algorithm RF aae: 0.6825510544130904
+Covering Algorithm GB aae: 0.5978988583498077
+Covering Algorithm AD aae: 0.615478702029335
+RuleFit aae: 0.4398764686452241
+SIRUS aae: 0.6376803930569752
+NodeHarvest aae: 0.540086518373394
 
 MSE
 ---
-Decision Tree mse: 1.316878639371918
-Random Forest mse: 0.807920069523963
-Gradient Boosting mse: 0.953848635084702
-AdaBoost mse: 0.8451199108206486
-Covering Algorithm RF mse: 0.9283040118420344
-Covering Algorithm GB mse: 4.922303831178843
-Covering Algorithm AD mse: 4.01501050751779
-RuleFit mse: 0.8272456770270792
+Decision Tree mse: 0.6688130344817249
+Random Forest mse: 0.3081179527186297
+Gradient Boosting mse: 0.25796466603929075
+AdaBoost mse: 0.2924015799964534
+Covering Algorithm RF mse: 0.47830035579169766
+Covering Algorithm GB mse: 0.3560612750418245
+Covering Algorithm AD mse: 0.37352323379668045
+RuleFit mse: 0.25368221569884036
+SIRUS mse: 0.39839734189137277
+NodeHarvest mse: 0.31997286365037325
 
 R2 score
 --------
-Decision Tree R2 score -0.31687863937191807
-Random Forest R2 score 0.192079930476037
-Gradient Boosting R2 score 0.04615136491529814
-AdaBoost R2 score 0.15488008917935137
-Covering Algorithm RF R2 score 0.07169598815796574
-Covering Algorithm GB R2 score -3.9223038311788434
-Covering Algorithm AD R2 score -3.015010507517789
-RuleFit R2 score 0.17275432297292093
+Decision Tree R2 score 0.3311869655182751
+Random Forest R2 score 0.6918820472813704
+Gradient Boosting R2 score 0.7420353339607093
+AdaBoost R2 score 0.7075984200035467
+Covering Algorithm RF R2 score 0.5216996442083024
+Covering Algorithm GB R2 score 0.6439387249581756
+Covering Algorithm AD R2 score 0.6264767662033195
+RuleFit R2 score 0.7463177843011597
+SIRUS R2 score 0.6016026581086272
+NodeHarvest R2 score 0.6800271363496267
 
-=====  STUDENT_POR_EASY  =====
+=====  DIABETES  =====
 Covering Algorithm RF selected set of rules covering: 1.0
 Covering Algorithm GB selected set of rules covering: 1.0
 Covering Algorithm AD selected set of rules covering: 1.0
-Bad prediction for Covering Algorithm RF: 0.0
+Bad prediction for Covering Algorithm RF: 0.07518796992481203
+Bad prediction for Covering Algorithm GB: 0.2556390977443609
+Bad prediction for Covering Algorithm AD: 0.06015037593984962
+
+Interpretability score
+----------------------
+Decision tree interpretability score: 8
+Random Forest interpretability score: 23310
+Gradient Boosting interpretability score: 25258
+AdBoost interpretability score: 3292
+Covering Algorithm RF interpretability score: 18
+Covering Algorithm GB interpretability score: 27
+Covering Algorithm AB interpretability score: 24
+RuleFit interpretability score: 1328
+Linear relation: 0
+SIRUS interpretability score: 14
+NodeHarvest interpretability score: 103
+
+aae
+---
+Decision Tree aae: 0.8590084710369186
+Random Forest aae: 0.692375192828254
+Gradient Boosting aae: 0.8073764073746856
+AdaBoost aae: 0.6817003988457598
+Covering Algorithm RF aae: 0.845176504914141
+Covering Algorithm GB aae: 1.2777331493435733
+Covering Algorithm AD aae: 0.8779229357168591
+RuleFit aae: 0.7603231323018976
+SIRUS aae: 0.691884561497271
+NodeHarvest aae: 0.7078129289476178
+
+MSE
+---
+Decision Tree mse: 0.8797479544580731
+Random Forest mse: 0.5342124635371854
+Gradient Boosting mse: 0.7579211018447545
+AdaBoost mse: 0.5220855205395398
+Covering Algorithm RF mse: 0.8876484334954315
+Covering Algorithm GB mse: 2.2949352433691312
+Covering Algorithm AD mse: 0.9864202479056209
+RuleFit mse: 0.6988600590069053
+SIRUS mse: 0.5395028348597721
+NodeHarvest mse: 0.540374606541074
+
+R2 score
+--------
+Decision Tree R2 score 0.12025204554192692
+Random Forest R2 score 0.46578753646281457
+Gradient Boosting R2 score 0.24207889815524553
+AdaBoost R2 score 0.4779144794604603
+Covering Algorithm RF R2 score 0.11235156650456857
+Covering Algorithm GB R2 score -1.2949352433691312
+Covering Algorithm AD R2 score 0.013579752094379116
+RuleFit R2 score 0.3011399409930947
+SIRUS R2 score 0.46049716514022787
+NodeHarvest R2 score 0.45962539345892595
+
+=====  ABALONE  =====
+Covering Algorithm RF selected set of rules covering: 1.0
+Covering Algorithm GB selected set of rules covering: 0.9972630858706808
+Covering Algorithm AD selected set of rules covering: 0.9962367430721861
+Bad prediction for Covering Algorithm RF: 0.0023923444976076554
+Bad prediction for Covering Algorithm GB: 0.19936204146730463
+Bad prediction for Covering Algorithm AD: 0.02631578947368421
+
+Interpretability score
+----------------------
+Decision tree interpretability score: 6
+Random Forest interpretability score: 16802
+Gradient Boosting interpretability score: 25744
+AdBoost interpretability score: 7440
+Covering Algorithm RF interpretability score: 33
+Covering Algorithm GB interpretability score: 90
+Covering Algorithm AB interpretability score: 40
+RuleFit interpretability score: 587
+Linear relation: 0
+SIRUS interpretability score: 11
+NodeHarvest interpretability score: 93
+
+aae
+---
+Decision Tree aae: 1.5891267032693535
+Random Forest aae: 0.7802857855996257
+Gradient Boosting aae: 0.8839966974936064
+AdaBoost aae: 1.0804274280242527
+Covering Algorithm RF aae: 0.7443340134964105
+Covering Algorithm GB aae: 1.5839584718378148
+Covering Algorithm AD aae: 0.8519105831660192
+RuleFit aae: 0.6591448701185209
+SIRUS aae: 0.8044599275406723
+NodeHarvest aae: 0.7830957155584782
+
+MSE
+---
+Decision Tree mse: 2.1213751259403435
+Random Forest mse: 0.597545356270973
+Gradient Boosting mse: 0.8001674822468379
+AdaBoost mse: 0.8330585955140747
+Covering Algorithm RF mse: 0.5898758743221169
+Covering Algorithm GB mse: 3.5480489299867215
+Covering Algorithm AD mse: 0.8874304485990363
+RuleFit mse: 0.4588842382836993
+SIRUS mse: 0.6398779295174517
+NodeHarvest mse: 0.5998615797589647
+
+R2 score
+--------
+Decision Tree R2 score -1.1213751259403435
+Random Forest R2 score 0.40245464372902695
+Gradient Boosting R2 score 0.19983251775316224
+AdaBoost R2 score 0.1669414044859252
+Covering Algorithm RF R2 score 0.41012412567788314
+Covering Algorithm GB R2 score -2.5480489299867215
+Covering Algorithm AD R2 score 0.1125695514009637
+RuleFit R2 score 0.5411157617163007
+SIRUS R2 score 0.3601220704825483
+NodeHarvest R2 score 0.4001384202410353
+
+=====  MACHINE  =====
+Covering Algorithm RF selected set of rules covering: 1.0
+Covering Algorithm GB selected set of rules covering: 1.0
+Covering Algorithm AD selected set of rules covering: 1.0
+Bad prediction for Covering Algorithm RF: 0.015873015873015872
 Bad prediction for Covering Algorithm GB: 0.0
 Bad prediction for Covering Algorithm AD: 0.0
 
 Interpretability score
 ----------------------
-Decision tree interpretability score: 6
-Random Forest interpretability score: 3046
-Gradient Boosting interpretability score: 5590
-AdBoost interpretability score: 8930
+Decision tree interpretability score: 12
+Random Forest interpretability score: 22346
+Gradient Boosting interpretability score: 25454
+AdBoost interpretability score: 2822
 Covering Algorithm RF interpretability score: 5
-Covering Algorithm GB interpretability score: 5
-Covering Algorithm AB interpretability score: 3
-RuleFit interpretability score: 89
-Linear relation: 2
+Covering Algorithm GB interpretability score: 6
+Covering Algorithm AB interpretability score: 7
+RuleFit interpretability score: 348
+Linear relation: 4
+SIRUS interpretability score: 14
+NodeHarvest interpretability score: 115
 
 aae
 ---
-Decision Tree aae: 0.6923643719560928
-Random Forest aae: 0.40654423912356324
-Gradient Boosting aae: 0.33390435417055947
-AdaBoost aae: 0.36956569798777616
-Covering Algorithm RF aae: 0.5789230636168048
-Covering Algorithm GB aae: 0.5442333952425604
-Covering Algorithm AD aae: 0.5638737398133532
-RuleFit aae: 0.3046519598338437
+Decision Tree aae: 0.5136941754588813
+Random Forest aae: 0.41929197774891225
+Gradient Boosting aae: 0.21602425684727572
+AdaBoost aae: 0.44434463188479456
+Covering Algorithm RF aae: 0.38010053876216854
+Covering Algorithm GB aae: 0.36214912616296696
+Covering Algorithm AD aae: 0.3491454902120103
+RuleFit aae: 0.20121541031746476
+SIRUS aae: 0.5005393307670141
+NodeHarvest aae: 0.47197636775134605
 
 MSE
 ---
-Decision Tree mse: 0.5396066783322668
-Random Forest mse: 0.20900846365671583
-Gradient Boosting mse: 0.14940670750944213
-AdaBoost mse: 0.16388706517296858
-Covering Algorithm RF mse: 0.3474104784733768
-Covering Algorithm GB mse: 0.3139574806062938
-Covering Algorithm AD mse: 0.35075035306946284
-RuleFit mse: 0.13928630336725067
+Decision Tree mse: 0.15075389734616182
+Random Forest mse: 0.26679150426981874
+Gradient Boosting mse: 0.11337059500398888
+AdaBoost mse: 0.35846383516435215
+Covering Algorithm RF mse: 0.14851961634886157
+Covering Algorithm GB mse: 0.14093204095050607
+Covering Algorithm AD mse: 0.12241762963158145
+RuleFit mse: 0.13246165408997249
+SIRUS mse: 0.3587582840598304
+NodeHarvest mse: 0.47643218838790863
 
 R2 score
 --------
-Decision Tree R2 score 0.4603933216677333
-Random Forest R2 score 0.7909915363432842
-Gradient Boosting R2 score 0.8505932924905579
-AdaBoost R2 score 0.8361129348270314
-Covering Algorithm RF R2 score 0.6525895215266232
-Covering Algorithm GB R2 score 0.6860425193937063
-Covering Algorithm AD R2 score 0.6492496469305371
-RuleFit R2 score 0.8607136966327493
+Decision Tree R2 score 0.8492461026538383
+Random Forest R2 score 0.7332084957301813
+Gradient Boosting R2 score 0.8866294049960111
+AdaBoost R2 score 0.6415361648356479
+Covering Algorithm RF R2 score 0.8514803836511384
+Covering Algorithm GB R2 score 0.859067959049494
+Covering Algorithm AD R2 score 0.8775823703684186
+RuleFit R2 score 0.8675383459100275
+SIRUS R2 score 0.6412417159401695
+NodeHarvest R2 score 0.5235678116120914
 
-=====  STUDENT_MAT_EASY  =====
+=====  MPG  =====
 Covering Algorithm RF selected set of rules covering: 1.0
 Covering Algorithm GB selected set of rules covering: 1.0
 Covering Algorithm AD selected set of rules covering: 1.0
 Bad prediction for Covering Algorithm RF: 0.0
-Bad prediction for Covering Algorithm GB: 0.025210084033613446
-Bad prediction for Covering Algorithm AD: 0.07563025210084033
+Bad prediction for Covering Algorithm GB: 0.008333333333333333
+Bad prediction for Covering Algorithm AD: 0.0
 
 Interpretability score
 ----------------------
-Decision tree interpretability score: 6
-Random Forest interpretability score: 3572
-Gradient Boosting interpretability score: 5592
-AdBoost interpretability score: 1756
-Covering Algorithm RF interpretability score: 6
-Covering Algorithm GB interpretability score: 11
-Covering Algorithm AB interpretability score: 14
-RuleFit interpretability score: 334
-Linear relation: 6
+Decision tree interpretability score: 12
+Random Forest interpretability score: 26538
+Gradient Boosting interpretability score: 23670
+AdBoost interpretability score: 9352
+Covering Algorithm RF interpretability score: 4
+Covering Algorithm GB interpretability score: 10
+Covering Algorithm AB interpretability score: 6
+RuleFit interpretability score: 967
+Linear relation: 0
+SIRUS interpretability score: 15
+NodeHarvest interpretability score: 72
 
 aae
 ---
-Decision Tree aae: 0.6645873668215818
-Random Forest aae: 0.3490709530153552
-Gradient Boosting aae: 0.3119566678286519
-AdaBoost aae: 0.3186449176745098
-Covering Algorithm RF aae: 0.5136443368832855
-Covering Algorithm GB aae: 0.5047190384176032
-Covering Algorithm AD aae: 0.5322450007943127
-RuleFit aae: 0.2914305293630845
+Decision Tree aae: 0.5048917806021352
+Random Forest aae: 0.4082824045472084
+Gradient Boosting aae: 0.3248584754498129
+AdaBoost aae: 0.34587035275247263
+Covering Algorithm RF aae: 0.4782719428904118
+Covering Algorithm GB aae: 0.4772311229238436
+Covering Algorithm AD aae: 0.4201217787863627
+RuleFit aae: 0.2835685805156596
+SIRUS aae: 0.48205533251988814
+NodeHarvest aae: 0.39517343301594454
 
 MSE
 ---
-Decision Tree mse: 0.5108856678252484
-Random Forest mse: 0.1543403013259291
-Gradient Boosting mse: 0.14817554583320247
-AdaBoost mse: 0.14283210646249458
-Covering Algorithm RF mse: 0.25038093022691893
-Covering Algorithm GB mse: 0.35755118450043616
-Covering Algorithm AD mse: 0.4090002976450318
-RuleFit mse: 0.1516744070181122
+Decision Tree mse: 0.27136797026443027
+Random Forest mse: 0.18214022464018476
+Gradient Boosting mse: 0.12295409698451772
+AdaBoost mse: 0.1617427147607161
+Covering Algorithm RF mse: 0.24374342432739554
+Covering Algorithm GB mse: 0.3299078600207691
+Covering Algorithm AD mse: 0.19105628085412804
+RuleFit mse: 0.10203256664592447
+SIRUS mse: 0.24312993618626977
+NodeHarvest mse: 0.17283394743475725
 
 R2 score
 --------
-Decision Tree R2 score 0.48911433217475164
-Random Forest R2 score 0.8456596986740709
-Gradient Boosting R2 score 0.8518244541667975
-AdaBoost R2 score 0.8571678935375054
-Covering Algorithm RF R2 score 0.7496190697730811
-Covering Algorithm GB R2 score 0.6424488154995638
-Covering Algorithm AD R2 score 0.5909997023549682
-RuleFit R2 score 0.8483255929818878
+Decision Tree R2 score 0.7286320297355697
+Random Forest R2 score 0.8178597753598152
+Gradient Boosting R2 score 0.8770459030154822
+AdaBoost R2 score 0.8382572852392839
+Covering Algorithm RF R2 score 0.7562565756726045
+Covering Algorithm GB R2 score 0.6700921399792308
+Covering Algorithm AD R2 score 0.8089437191458719
+RuleFit R2 score 0.8979674333540755
+SIRUS R2 score 0.7568700638137302
+NodeHarvest R2 score 0.8271660525652428
 
+=====  BOSTON  =====
+Covering Algorithm RF selected set of rules covering: 1.0
+Covering Algorithm GB selected set of rules covering: 0.9971751412429378
+Covering Algorithm AD selected set of rules covering: 0.9943502824858758
+Bad prediction for Covering Algorithm RF: 0.006578947368421052
+Bad prediction for Covering Algorithm GB: 0.013157894736842105
+Bad prediction for Covering Algorithm AD: 0.03289473684210526
+
+Interpretability score
+----------------------
+Decision tree interpretability score: 8
+Random Forest interpretability score: 21292
+Gradient Boosting interpretability score: 25716
+AdBoost interpretability score: 68230
+Covering Algorithm RF interpretability score: 8
+Covering Algorithm GB interpretability score: 11
+Covering Algorithm AB interpretability score: 11
+RuleFit interpretability score: 1067
+Linear relation: 0
+SIRUS interpretability score: 13
+NodeHarvest interpretability score: 96
+
+aae
+---
+Decision Tree aae: 0.8064769162945302
+Random Forest aae: 0.5253454277181602
+Gradient Boosting aae: 0.376423056397467
+AdaBoost aae: 0.4855443315776499
+Covering Algorithm RF aae: 0.6916260138507021
+Covering Algorithm GB aae: 0.707135166014386
+Covering Algorithm AD aae: 0.8007906456134335
+RuleFit aae: 0.38926291530426976
+SIRUS aae: 0.5872488160705989
+NodeHarvest aae: 0.5222705816002379
+
+MSE
+---
+Decision Tree mse: 0.48665098026901676
+Random Forest mse: 0.24633268193870098
+Gradient Boosting mse: 0.16027083675242068
+AdaBoost mse: 0.2055044304717479
+Covering Algorithm RF mse: 0.5102110637179276
+Covering Algorithm GB mse: 0.5527271081729779
+Covering Algorithm AD mse: 0.813642536934886
+RuleFit mse: 0.1517164166197487
+SIRUS mse: 0.32844245492722063
+NodeHarvest mse: 0.25846116234604377
+
+R2 score
+--------
+Decision Tree R2 score 0.5133490197309833
+Random Forest R2 score 0.753667318061299
+Gradient Boosting R2 score 0.8397291632475793
+AdaBoost R2 score 0.7944955695282521
+Covering Algorithm RF R2 score 0.48978893628207243
+Covering Algorithm GB R2 score 0.4472728918270221
+Covering Algorithm AD R2 score 0.18635746306511403
+RuleFit R2 score 0.8482835833802513
+SIRUS R2 score 0.6715575450727793
+NodeHarvest R2 score 0.7415388376539562
+
+=====  STUDENT_POR  =====
+Covering Algorithm RF selected set of rules covering: 0.9955947136563876
+Covering Algorithm GB selected set of rules covering: 0.9955947136563876
+Covering Algorithm AD selected set of rules covering: 0.9977973568281938
+Bad prediction for Covering Algorithm RF: 0.07179487179487179
+Bad prediction for Covering Algorithm GB: 0.7384615384615385
+Bad prediction for Covering Algorithm AD: 0.5384615384615384
+
+Interpretability score
+----------------------
+Decision tree interpretability score: 156
+Random Forest interpretability score: 28906
+Gradient Boosting interpretability score: 28792
+AdBoost interpretability score: 4584
+Covering Algorithm RF interpretability score: 18
+Covering Algorithm GB interpretability score: 73
+Covering Algorithm AB interpretability score: 45
+RuleFit interpretability score: 770
+Linear relation: 0
+SIRUS interpretability score: 15
+NodeHarvest interpretability score: 62
+
+aae
+---
+Decision Tree aae: 1.5584984037965626
+Random Forest aae: 0.9001309604447882
+Gradient Boosting aae: 1.0531920673027542
+AdaBoost aae: 0.8819503053640962
+Covering Algorithm RF aae: 1.1290384556840254
+Covering Algorithm GB aae: 3.879309403676493
+Covering Algorithm AD aae: 2.9964988949166167
+RuleFit aae: 0.8755265160552277
+SIRUS aae: 0.9009677254907579
+NodeHarvest aae: 0.8941170236648498
+
+MSE
+---
+Decision Tree mse: 2.044949939879518
+Random Forest mse: 0.7834425401069963
+Gradient Boosting mse: 1.0220444540802947
+AdaBoost mse: 0.7336286449541167
+Covering Algorithm RF mse: 1.4577167234515134
+Covering Algorithm GB mse: 10.21519795456149
+Covering Algorithm AD mse: 7.395187112161208
+RuleFit mse: 0.7568554178800557
+SIRUS mse: 0.7807160872582616
+NodeHarvest mse: 0.7849259447579244
+
+R2 score
+--------
+Decision Tree R2 score -1.0449499398795181
+Random Forest R2 score 0.21655745989300368
+Gradient Boosting R2 score -0.02204445408029465
+AdaBoost R2 score 0.2663713550458833
+Covering Algorithm RF R2 score -0.45771672345151315
+Covering Algorithm GB R2 score -9.21519795456149
+Covering Algorithm AD R2 score -6.395187112161208
+RuleFit R2 score 0.24314458211994439
+SIRUS R2 score 0.21928391274173842
+NodeHarvest R2 score 0.21507405524207546

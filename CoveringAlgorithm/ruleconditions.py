@@ -86,24 +86,24 @@ class RuleConditions(object):
             if len(x_col) > 1:
                 x_col = np.squeeze(np.asarray(x_col))
 
-            # if type(self.bmin[i]) == str:
-            #     x_col = np.array(x_col, dtype=np.str)
-            #
-            #     temp = (x_col == self.bmin[i])
-            #     temp |= (x_col == self.bmax[i])
-            #     geq_min &= temp
-            #     leq_min &= True
-            #     not_nan &= True
-            # else:
-            x_col = np.array(x_col, dtype=np.float)
+            if type(self.bmin[i]) == str:
+                x_col = np.array(x_col, dtype=np.str)
 
-            # x_temp = [self.bmin[i] - 1 if x != x else x for x in x_col]
-            geq_min &= np.greater_equal(x_col, self.bmin[i])
+                temp = (x_col == self.bmin[i])
+                temp |= (x_col == self.bmax[i])
+                geq_min &= temp
+                leq_min &= True
+                not_nan &= True
+            else:
+                x_col = np.array(x_col, dtype=np.float)
 
-            # x_temp = [self.bmax[i] + 1 if x != x else x for x in x_col]
-            leq_min &= np.less_equal(x_col, self.bmax[i])
+                # x_temp = [self.bmin[i] - 1 if x != x else x for x in x_col]
+                geq_min &= np.greater_equal(x_col, self.bmin[i])
 
-            not_nan &= np.isfinite(x_col)
+                # x_temp = [self.bmax[i] + 1 if x != x else x for x in x_col]
+                leq_min &= np.less_equal(x_col, self.bmax[i])
+
+                not_nan &= np.isfinite(x_col)
 
         activation_vector = 1 * (geq_min & leq_min & not_nan)
 

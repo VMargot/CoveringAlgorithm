@@ -290,7 +290,7 @@ def calc_pred(ruleset, ytrain, x):
     # Calculation of the conditional expectation in each cell
     prediction_vector = [f.calc_prediction(act, ytrain) for act in cells]
     prediction_vector = np.array(prediction_vector)
-
+    prediction_vector[prediction_vector == 0] = np.mean(ytrain)
     return prediction_vector
 
 
