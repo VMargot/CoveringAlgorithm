@@ -10,12 +10,10 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor, AdaBoostRegressor
 from sklearn.tree import DecisionTreeRegressor
 
-try:
-    import rulefit
-except ImportError:
-    print('Install the package rulefit from Christophe Molnar GitHub with the command'
-          'pip install git+git://github.com/christophM/rulefit.git')
-    rulefit = None
+import rulefit
+# 'Install the package rulefit from Christophe Molnar GitHub with the command
+# pip install git+git://github.com/christophM/rulefit.git')
+
 import CoveringAlgorithm.CA as CA
 import CoveringAlgorithm.functions as func
 import CoveringAlgorithm.covering_tools as ct
@@ -173,14 +171,15 @@ if __name__ == '__main__':
                              pathx, pathy, pathx_test],
                             stdout=f, stderr=subprocess.STDOUT)
 
-        df_int = pd.read_csv(join(racine_path, 'int.csv'), index_col=0)
-        sirus_rules = df_int['Sirus'].values[0]
-        NH_rules = df_int['NH'].values[0]
-        sirus_int = df_int['Sirus'].values[1]
-        NH_int = df_int['NH'].values[1]
-
         pred_sirus = pd.read_csv(join(racine_path, 'sirus_pred.csv'))['x'].values
         pred_nh = pd.read_csv(join(racine_path, 'nh_pred.csv'))['x'].values
+        rules_sirus = pd.read_csv(join(racine_path, 'sirus_rules.csv'))
+        rules_nh = pd.read_csv(join(racine_path, 'nh_rules.csv'))
+
+        sirus_rs = ct.make_rs_from_r(rules_sirus, features.to_list(), X_train.min(axis=0),
+                                     X_train.max(axis=0))
+        nh_rs = ct.make_rs_from_r(rules_nh, features.to_list(), X_train.min(axis=0),
+                                  X_train.max(axis=0))
 
         # Normalization of the error
         deno_aae = np.mean(np.abs(y_test - np.median(y_test)))
@@ -266,29 +265,24 @@ if __name__ == '__main__':
               ca_ad.selected_rs.calc_coverage())
 
         # ## RuleFit
-        if rulefit is not None:
-            rule_fit = rulefit.RuleFit(tree_size=tree_size,
-                                       max_rules=max_rules,
-                                       random_state=seed,
-                                       max_iter=2000)
-            rule_fit.fit(X_train, y_train)
+        rule_fit = rulefit.RuleFit(tree_size=tree_size,
+                                   max_rules=max_rules,
+                                   random_state=seed,
+                                   max_iter=2000)
+        rule_fit.fit(X_train, y_train)
 
-            # ### RuleFit rules part
-            rules = rule_fit.get_rules()
-            rules = rules[rules.coef != 0].sort_values(by="support")
-            rules = rules.loc[rules['type'] == 'rule']
+        # ### RuleFit rules part
+        rules = rule_fit.get_rules()
+        rules = rules[rules.coef != 0].sort_values(by="support")
+        rules = rules.loc[rules['type'] == 'rule']
 
-            # ### RuleFit linear part
-            lin = rule_fit.get_rules()
-            lin = lin[lin.coef != 0].sort_values(by="support")
-            lin = lin.loc[lin['type'] == 'linear']
+        # ### RuleFit linear part
+        lin = rule_fit.get_rules()
+        lin = lin[lin.coef != 0].sort_values(by="support")
+        lin = lin.loc[lin['type'] == 'linear']
 
-            rulefit_rules = ct.extract_rules_rulefit(rules, features, X_train.min(axis=0),
-                                                     X_train.max(axis=0))
-        else:
-            rule_fit = None
-            rulefit_rules = None
-            lin = None
+        rulefit_rules = ct.extract_rules_rulefit(rules, features, X_train.min(axis=0),
+                                                 X_train.max(axis=0))
 
         # ## Errors calculation
         pred_tree = tree.predict(X_test)
@@ -304,11 +298,11 @@ if __name__ == '__main__':
             pred_rulefit = None
 
         print('Bad prediction for Covering Algorithm RF:',
-              sum([x == 0 for x in pred_CA_rf]) / len(y_test))
+              sum([x == np.mean(y_train) for x in pred_CA_rf]) / len(y_test))
         print('Bad prediction for Covering Algorithm GB:',
-              sum([x == 0 for x in pred_CA_gb]) / len(y_test))
+              sum([x == np.mean(y_train)  for x in pred_CA_gb]) / len(y_test))
         print('Bad prediction for Covering Algorithm AD:',
-              sum([x == 0 for x in pred_CA_ad]) / len(y_test))
+              sum([x == np.mean(y_train)  for x in pred_CA_ad]) / len(y_test))
 
         # ## Results.
         print('')
@@ -321,27 +315,25 @@ if __name__ == '__main__':
         print('Covering Algorithm RF interpretability score:', len(ca_rf.selected_rs))
         print('Covering Algorithm GB interpretability score:', len(ca_gb.selected_rs))
         print('Covering Algorithm AB interpretability score:', len(ca_ad.selected_rs))
-        if rulefit_rules is not None:
-            print('RuleFit interpretability score:', len(rulefit_rules))
-            print('Linear relation:', len(lin))
-        print('SIRUS interpretability score:', sirus_rules)
-        print('NodeHarvest interpretability score:', NH_rules)
+        print('RuleFit interpretability score:', len(rulefit_rules))
+        print('Linear relation:', len(lin))
+        print('SIRUS interpretability score:', len(sirus_rs))
+        print('NodeHarvest interpretability score:', len(nh_rs))
 
         print('')
         print('Interpretability score')
         print('----------------------')
-        print('Decision tree interpretability score:', func.inter(tree_rules))
-        print('Random Forest interpretability score:', func.inter(rf_rule_list))
-        print('Gradient Boosting interpretability score:', func.inter(gb_rule_list))
-        print('AdBoost interpretability score:', func.inter(ad_rule_list))
-        print('Covering Algorithm RF interpretability score:', func.inter(ca_rf.selected_rs))
-        print('Covering Algorithm GB interpretability score:', func.inter(ca_gb.selected_rs))
-        print('Covering Algorithm AB interpretability score:', func.inter(ca_ad.selected_rs))
-        if rulefit_rules is not None:
-            print('RuleFit interpretability score:', func.inter(rulefit_rules))
-            print('Linear relation:', len(lin))
-        print('SIRUS interpretability score:', sirus_int)
-        print('NodeHarvest interpretability score:', NH_int)
+        print('Decision tree interpretability score:', ct.inter(tree_rules))
+        print('Random Forest interpretability score:', ct.inter(rf_rule_list))
+        print('Gradient Boosting interpretability score:', ct.inter(gb_rule_list))
+        print('AdBoost interpretability score:', ct.inter(ad_rule_list))
+        print('Covering Algorithm RF interpretability score:', ct.inter(ca_rf.selected_rs))
+        print('Covering Algorithm GB interpretability score:', ct.inter(ca_gb.selected_rs))
+        print('Covering Algorithm AB interpretability score:', ct.inter(ca_ad.selected_rs))
+        print('RuleFit interpretability score:', ct.inter(rulefit_rules))
+        print('Linear relation:', len(lin))
+        print('SIRUS interpretability score:', ct.inter(sirus_rs))
+        print('NodeHarvest interpretability score:', ct.inter(nh_rs))
 
         print('')
         print('aae')
@@ -353,8 +345,7 @@ if __name__ == '__main__':
         print('Covering Algorithm RF aae:', np.mean(np.abs(y_test - pred_CA_rf)) / deno_aae)
         print('Covering Algorithm GB aae:', np.mean(np.abs(y_test - pred_CA_gb)) / deno_aae)
         print('Covering Algorithm AD aae:', np.mean(np.abs(y_test - pred_CA_ad)) / deno_aae)
-        if pred_rulefit is not None:
-            print('RuleFit aae:', np.mean(np.abs(y_test - pred_rulefit)) / deno_aae)
+        print('RuleFit aae:', np.mean(np.abs(y_test - pred_rulefit)) / deno_aae)
         print('SIRUS aae:', np.mean(np.abs(y_test - pred_sirus)) / deno_aae)
         print('NodeHarvest aae:', np.mean(np.abs(y_test - pred_nh)) / deno_aae)
 
@@ -368,8 +359,7 @@ if __name__ == '__main__':
         print('Covering Algorithm RF mse:', np.mean((y_test - pred_CA_rf) ** 2) / deno_mse)
         print('Covering Algorithm GB mse:', np.mean((y_test - pred_CA_gb) ** 2) / deno_mse)
         print('Covering Algorithm AD mse:', np.mean((y_test - pred_CA_ad) ** 2) / deno_mse)
-        if pred_rulefit is not None:
-            print('RuleFit mse:', np.mean((y_test - pred_rulefit) ** 2) / deno_mse)
+        print('RuleFit mse:', np.mean((y_test - pred_rulefit) ** 2) / deno_mse)
         print('SIRUS mse:', np.mean((y_test - pred_sirus) ** 2) / deno_mse)
         print('NodeHarvest mse:', np.mean((y_test - pred_nh) ** 2) / deno_mse)
 
@@ -383,7 +373,6 @@ if __name__ == '__main__':
         print('Covering Algorithm RF R2 score', r2_score(y_test, pred_CA_rf))
         print('Covering Algorithm GB R2 score', r2_score(y_test, pred_CA_gb))
         print('Covering Algorithm AD R2 score', r2_score(y_test, pred_CA_ad))
-        if pred_rulefit is not None:
-            print('RuleFit R2 score', r2_score(y_test, pred_rulefit))
+        print('RuleFit R2 score', r2_score(y_test, pred_rulefit))
         print('SIRUS R2 score', r2_score(y_test, pred_sirus))
         print('NodeHarvest R2 score', r2_score(y_test, pred_nh))

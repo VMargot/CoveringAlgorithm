@@ -1,19 +1,28 @@
 import copy
 import math
+import operator
+import functools
+from collections import Counter
 from typing import List, Union
+import seaborn as sns
+import scipy.spatial.distance as scipy_dist
+import matplotlib
+from matplotlib import patches
+import matplotlib.pyplot as plt
 
 import numpy as np
 import pandas as pd
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from sklearn.tree import _tree
-import matplotlib
-import matplotlib.pyplot as plt
-from matplotlib import patches
 
-from CoveringAlgorithm import functions as f
+from CoveringAlgorithm.functions import dist, calc_prediction
 from CoveringAlgorithm.ruleset import RuleSet
 from CoveringAlgorithm.rule import Rule
 from CoveringAlgorithm.ruleconditions import RuleConditions
+
+
+def inter(rs: Union[RuleSet, List[Rule]]) -> int:
+    return sum(map(lambda r: r.length, rs))
 
 
 def extract_rules_from_tree(tree: Union[DecisionTreeClassifier, DecisionTreeRegressor],
@@ -288,7 +297,7 @@ def calc_pred(ruleset, ytrain, x):
     cells = ((dot_activation - no_activation_vector) > 0)
 
     # Calculation of the conditional expectation in each cell
-    prediction_vector = [f.calc_prediction(act, ytrain) for act in cells]
+    prediction_vector = [calc_prediction(act, ytrain) for act in cells]
     prediction_vector = np.array(prediction_vector)
     prediction_vector[prediction_vector == 0] = np.mean(ytrain)
     return prediction_vector
@@ -462,3 +471,117 @@ def plot_rules(selected_rs, ymax, ymin,
 
     # plt.colorbar()
     plt.gca().axis([xmin[0], xmax[0], xmin[1], xmax[1]])
+
+
+def get_variables_count(ruleset: RuleSet):
+    """
+    Get a counter of all different features in the ruleset
+
+    Parameters
+    ----------
+    ruleset : {ruleset type}
+             A set of rules
+
+    Return
+    ------
+    count : {Counter type}
+            Counter of all different features in the ruleset
+    """
+    col_varuleset = [rule.conditions.get_param('features_name')
+                     for rule in ruleset]
+    varuleset_list = functools.reduce(operator.add, col_varuleset)
+    count = Counter(varuleset_list)
+
+    count = count.most_common()
+    return count
+
+
+def plot_counter_variables(ruleset: RuleSet, nb_max: int = None):
+    counter = get_variables_count(ruleset)
+
+    x_labels = list(map(lambda item: item[0], counter))
+    values = list(map(lambda item: item[1], counter))
+
+    fig = plt.figure()
+    ax = plt.subplot()
+
+    if nb_max is not None:
+        x_labels = x_labels[:nb_max]
+        values = values[:nb_max]
+
+    g = sns.barplot(y=x_labels, x=values, ax=ax, ci=None)
+    g.set(xlim=(0, max(values) + 1), ylabel='Variable', xlabel='Count')
+
+    return fig
+
+
+def plot_dist(ruleset: RuleSet, x: np.ndarray = None):
+    rules_names = ruleset.get_rules_name()
+
+    predictions_vector_list = [rule.get_predictions_vector(x) for rule in ruleset]
+    predictions_matrix = np.array(predictions_vector_list)
+
+    distance_vector = scipy_dist.pdist(predictions_matrix, metric=dist)
+    distance_matrix = scipy_dist.squareform(distance_vector)
+
+    # Set up the matplotlib figure
+    f = plt.figure()
+    ax = plt.subplot()
+
+    # Generate a mask for the upper triangle
+    mask = np.zeros_like(distance_matrix, dtype=np.bool)
+    mask[np.triu_indices_from(mask)] = True
+
+    # Generate a custom diverging colormap
+    cmap = sns.diverging_palette(220, 10, as_cmap=True)
+
+    vmax = np.max(distance_matrix)
+    vmin = np.min(distance_matrix)
+    # center = np.mean(distance_matrix)
+
+    # Draw the heatmap with the mask and correct aspect ratio
+    sns.heatmap(distance_matrix, cmap=cmap, ax=ax,
+                vmax=vmax, vmin=vmin, center=1.,
+                square=True, xticklabels=rules_names,
+                yticklabels=rules_names, mask=mask)
+
+    plt.yticks(rotation=0)
+    plt.xticks(rotation=90)
+
+    return f
+
+
+def make_rs_from_r(df, features_list, xmin, xmax):
+    rules = df['Rules'].values
+    rule_list = []
+    for i in range(len(rules)):
+        rl_i = rules[i].split(' AND ')
+        cp = len(rl_i)
+        conditions = [[] for _ in range(6)]
+
+        for j in range(cp):
+            feature_name = rl_i[j].split(' in ')[0]
+            feature_id = features_list.index(feature_name)
+            bmin = rl_i[j].split(' in ')[1].split(';')[0]
+            if bmin == '-Inf':
+                bmin = xmin[feature_id]
+            else:
+                bmin = float(bmin)
+            bmax = rl_i[j].split(' in ')[1].split(';')[1]
+            if bmax == 'Inf':
+                bmax = xmax[feature_id]
+            else:
+                bmax = float(bmax)
+
+            conditions[0] += [feature_name]
+            conditions[1] += [feature_id]
+            conditions[2] += [bmin]
+            conditions[3] += [bmax]
+            conditions[4] += [xmin[feature_id]]
+            conditions[5] += [xmax[feature_id]]
+
+        new_cond = RuleConditions(conditions[0], conditions[1], conditions[2], conditions[3],
+                                  xmin=conditions[4], xmax=conditions[5])
+        rule_list.append(Rule(new_cond))
+
+    return RuleSet(rule_list)
