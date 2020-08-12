@@ -561,6 +561,7 @@ def make_rs_from_r(df, features_list, xmin, xmax):
 
         for j in range(cp):
             feature_name = rl_i[j].split(' in ')[0]
+            feature_name = feature_name.replace('.', ' ')
             feature_id = features_list.index(feature_name)
             bmin = rl_i[j].split(' in ')[1].split(';')[0]
             if bmin == '-Inf':

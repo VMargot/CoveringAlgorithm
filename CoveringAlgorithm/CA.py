@@ -33,7 +33,7 @@ class CA:
     """
     def __init__(self, alpha: float = 1/2 - 1/100, gamma: float = 0.95,
                  lmax: int = 3, tree_size: int = 4, max_rules: int = 10000,
-                 learning_rate: float = 0.2, n_jobs: int = None, seed: int = None,
+                 learning_rate: float = 0.1, n_jobs: int = None, seed: int = None,
                  mode: str = 'r', generator_func: Callable = None):
         """
         Parameters
