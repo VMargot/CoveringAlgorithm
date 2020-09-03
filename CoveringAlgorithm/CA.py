@@ -31,10 +31,10 @@ class CA:
     """
     Covering Algorithm class
     """
-    def __init__(self, alpha: float = 1/2 - 1/100, gamma: float = 0.95,
-                 lmax: int = 3, tree_size: int = 4, max_rules: int = 10000,
-                 learning_rate: float = 0.1, n_jobs: int = None, seed: int = None,
-                 mode: str = 'r', generator_func: Callable = None):
+    def __init__(self, alpha: float = 1/2 - 1/100, gamma: float = 0.90,
+                 lmax: int = 3, tree_size: int = 8, max_rules: int = 4000,
+                 learning_rate: float = 0.1, subsample: float = 1.0,  n_jobs: int = None,
+                 seed: int = None, mode: str = 'r', generator_func: Callable = None):
         """
         Parameters
         ----------
@@ -58,6 +58,7 @@ class CA:
         self.seed = seed
         self.learning_rate = learning_rate
         self.mode = mode
+        self.subsample = subsample
         self.generator = generator_func
         self.rules_generator = None
         self.features = []
@@ -107,11 +108,9 @@ class CA:
             self.features = ['feature_' + str(col) for col in range(0, X.shape[1])]
         else:
             self.features = features
-        n = X.shape[0]
-        subsample = min(0.5, (100 + 6 * np.sqrt(n)) / n)
         nb_estimator = int(np.ceil(self.max_rules/self.tree_size))
 
-        self.set_rule_generator(nb_estimator, subsample, self.mode)
+        self.set_rule_generator(nb_estimator, self.subsample, self.mode)
         self.rules_generator.fit(X, y)
         self.extract_rules(x_min, x_max)
         self.eval_rules(X, y)

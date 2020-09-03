@@ -4,6 +4,8 @@ args = commandArgs(trailingOnly=TRUE)
 pathx = args[1]
 pathy = args[2]
 pathx_test = args[3]
+p0 = as.double(args[4])
+seed = as.double(args[5])
 
 X <- read.csv(file=pathx, header=TRUE, sep=",")
 y <- read.csv(file=pathy, header=FALSE, sep=",")
@@ -16,7 +18,15 @@ library(nodeHarvest)
 ##############################
 ##          SIRUS           ##
 ##############################
-sirus.m <- sirus.fit(X, y, max.depth=3, verbose=FALSE)
+if(p0 == 0){
+cv.grid <- sirus.cv(X, y, nfold=20, ncv=10)
+p0 = cv.grid$p0.pred
+fileConn <- file("p0.txt")
+writeLines(toString(p0), fileConn)
+close(fileConn)
+}
+sirus.m <- sirus.fit(X, y, max.depth=3, p0=p0, verbose=FALSE, seed=seed)
+
 sirus_nbrules = length(sirus.m$rules)
 int_sirus <- 0
 for(i in 1:length(sirus.m$rules)){int_sirus = int_sirus + length(sirus.m$rules[[i]])}

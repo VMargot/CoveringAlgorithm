@@ -1,307 +1,325 @@
-=====  PROSTATE  =====
-Nb Rules
-----------------------
-Decision tree nb rules: 38.0
-Random Forest nb rules: 15000.0
-Covering Algorithm GB nb rules: 9.0
-RuleFit nb rules: 132.0
-Linear relation: 1.0
-SIRUS nb rules: 10.0
-NodeHarvest nb rules: 56.2
-
-Interpretability score
-----------------------
-Decision tree interpretability score: 108.0
-Random Forest interpretability score: 21240.0
-Covering Algorithm GB interpretability score: 19.0
-RuleFit interpretability score: 401.0
-SIRUS interpretability score: 12.1
-NodeHarvest interpretability score: 103.2
-
-R2 score
---------
-Decision tree R2 score: 0.43735242325456725
-Random Forest R2 score: 0.5301071547703362
-Covering Algorithm GB R2 score: 0.2887714963285476
-RuleFit R2 score: 0.30761610661404193
-SIRUS R2 score: 0.46066924696868894
-NodeHarvest R2 score: 0.5461875859799227
-
-MSE
---------
-Decision tree MSE: 0.5626475767454328
-Random Forest MSE: 0.4698928452296638
-Covering Algorithm GB MSE: 0.7112285036714524
-RuleFit MSE: 0.6923838933859582
-SIRUS MSE: 0.5393307530313112
-NodeHarvest MSE: 0.45381241402007727
-
-=====  OZONE  =====
-Nb Rules
-----------------------
-Decision tree nb rules: 38.0
-Random Forest nb rules: 15000.0
-Covering Algorithm GB nb rules: 5.0
-RuleFit nb rules: 279.0
-Linear relation: 0.0
-SIRUS nb rules: 10.0
-NodeHarvest nb rules: 56.3
-
-Interpretability score
-----------------------
-Decision tree interpretability score: 116.0
-Random Forest interpretability score: 24244.0
-Covering Algorithm GB interpretability score: 9.0
-RuleFit interpretability score: 961.0
-SIRUS interpretability score: 12.3
-NodeHarvest interpretability score: 103.3
-
-R2 score
---------
-Decision tree R2 score: 0.4894565374792587
-Random Forest R2 score: 0.6918820472813704
-Covering Algorithm GB R2 score: 0.5497356338406455
-RuleFit R2 score: 0.757056601901234
-SIRUS R2 score: 0.6067970448699544
-NodeHarvest R2 score: 0.6770636725494231
-
-MSE
---------
-Decision tree MSE: 0.5105434625207416
-Random Forest MSE: 0.30811795271862963
-Covering Algorithm GB MSE: 0.4502643661593545
-RuleFit MSE: 0.24294339809876594
-SIRUS MSE: 0.39320295513004566
-NodeHarvest MSE: 0.3229363274505769
+/usr/bin/python3.6 /home/vincent/PycharmProjects/CoveringAlgorithm/main.py
 
 =====  DIABETES  =====
+
 Nb Rules
 ----------------------
-Decision tree nb rules: 38.0
-Random Forest nb rules: 15000.0
-Covering Algorithm GB nb rules: 13.0
-RuleFit nb rules: 345.0
-Linear relation: 0.0
-SIRUS nb rules: 10.0
-NodeHarvest nb rules: 47.7
+Decision tree nb rules: 10.0
+Random Forest nb rules: 191190.6
+Covering Algorithm RF nb rules: 7.6
+Covering Algorithm GB nb rules: 9.1
+Covering Algorithm SGB nb rules: 8.75
+RuleFit nb rules: 249.35
+SIRUS nb rules: 21.25
+NodeHarvest nb rules: 227.15
+
+Coverage
+----------------------
+Decision tree coverage: 1.0
+Random Forest coverage: 1.0
+Covering Algorithm RF coverage: 0.9967637540453074
+Covering Algorithm GB coverage: 0.9944983818770228
+Covering Algorithm SGB coverage: 0.9941747572815535
+RuleFit coverage: 1.0
+SIRUS coverage: 0.9998381877022654
+NodeHarvest coverage: 1.0
 
 Interpretability score
 ----------------------
-Decision tree interpretability score: 114.0
-Random Forest interpretability score: 23310.0
-Covering Algorithm GB interpretability score: 27.0
-RuleFit interpretability score: 1182.0
-SIRUS interpretability score: 14.0
-NodeHarvest interpretability score: 88.2
+Decision tree interpretability score: 30.2
+Random Forest interpretability score: 1070454.75
+Covering Algorithm RF interpretability score: 17.95
+Covering Algorithm GB interpretability score: 19.7
+Covering Algorithm SGB interpretability score: 19.8
+RuleFit interpretability score: 1168.7
+SIRUS interpretability score: 32.35
+NodeHarvest interpretability score: 613.05
 
 R2 score
 --------
-Decision tree R2 score: 0.2942206142038167
-Random Forest R2 score: 0.4657875364628145
-Covering Algorithm GB R2 score: 0.31819976995915217
-RuleFit R2 score: 0.17748409133907073
-SIRUS R2 score: 0.46021741990821974
-NodeHarvest R2 score: 0.45452351076433495
+Decision tree R2 score: 1.1384063116304257
+Random Forest R2 score: 0.5849969873271107
+Covering Algorithm RF R2 score: 0.6974714996030402
+Covering Algorithm GB R2 score: 0.7397898454578489
+Covering Algorithm SGB R2 score: 0.6739328162927607
+RuleFit R2 score: 0.7073919736304725
+SIRUS R2 score: 0.5748144141908329
+NodeHarvest R2 score: 0.5870441186105627
 
-MSE
+=====  PROSTATE  =====
+
+Nb Rules
+----------------------
+Decision tree nb rules: 10.0
+Random Forest nb rules: 42047.95
+Covering Algorithm RF nb rules: 5.8
+Covering Algorithm GB nb rules: 6.05
+Covering Algorithm SGB nb rules: 6.5
+RuleFit nb rules: 78.4
+SIRUS nb rules: 23.25
+NodeHarvest nb rules: 66.0
+
+Coverage
+----------------------
+Decision tree coverage: 1.0
+Random Forest coverage: 1.0
+Covering Algorithm RF coverage: 1.0
+Covering Algorithm GB coverage: 1.0
+Covering Algorithm SGB coverage: 1.0
+RuleFit coverage: 1.0
+SIRUS coverage: 1.0
+NodeHarvest coverage: 1.0
+
+Interpretability score
+----------------------
+Decision tree interpretability score: 25.3
+Random Forest interpretability score: 169328.6
+Covering Algorithm RF interpretability score: 13.95
+Covering Algorithm GB interpretability score: 13.35
+Covering Algorithm SGB interpretability score: 15.05
+RuleFit interpretability score: 268.8
+SIRUS interpretability score: 33.7
+NodeHarvest interpretability score: 160.35
+
+R2 score
 --------
-Decision tree MSE: 0.7057793857961834
-Random Forest MSE: 0.5342124635371854
-Covering Algorithm GB MSE: 0.6818002300408479
-RuleFit MSE: 0.8225159086609294
-SIRUS MSE: 0.5397825800917803
-NodeHarvest MSE: 0.5454764892356652
+Decision tree R2 score: 1.1097284545179849
+Random Forest R2 score: 0.562354946417555
+Covering Algorithm RF R2 score: 0.8491598900620874
+Covering Algorithm GB R2 score: 0.8555822714788202
+Covering Algorithm SGB R2 score: 0.7603218688829414
+RuleFit R2 score: 0.6625083734653523
+SIRUS R2 score: 0.5938186980731098
+NodeHarvest R2 score: 0.5743232063578934
+
+=====  OZONE  =====
+
+Nb Rules
+----------------------
+Decision tree nb rules: 10.0
+Random Forest nb rules: 108082.95
+Covering Algorithm RF nb rules: 3.3
+Covering Algorithm GB nb rules: 3.95
+Covering Algorithm SGB nb rules: 4.05
+RuleFit nb rules: 187.45
+SIRUS nb rules: 24.9
+NodeHarvest nb rules: 181.45
+
+Coverage
+----------------------
+Decision tree coverage: 1.0
+Random Forest coverage: 1.0
+Covering Algorithm RF coverage: 0.999134199134199
+Covering Algorithm GB coverage: 0.998917748917749
+Covering Algorithm SGB coverage: 0.9991341991341992
+RuleFit coverage: 1.0
+SIRUS coverage: 1.0
+NodeHarvest coverage: 1.0
+
+Interpretability score
+----------------------
+Decision tree interpretability score: 32.0
+Random Forest interpretability score: 572067.75
+Covering Algorithm RF interpretability score: 5.85
+Covering Algorithm GB interpretability score: 6.55
+Covering Algorithm SGB interpretability score: 6.5
+RuleFit interpretability score: 851.0
+SIRUS interpretability score: 39.4
+NodeHarvest interpretability score: 472.9
+
+R2 score
+--------
+Decision tree R2 score: 0.495747772827144
+Random Forest R2 score: 0.27937888332095107
+Covering Algorithm RF R2 score: 0.42313322124409436
+Covering Algorithm GB R2 score: 0.3924995002919588
+Covering Algorithm SGB R2 score: 0.3841955390297084
+RuleFit R2 score: 0.2792531971424753
+SIRUS R2 score: 0.3243333386133602
+NodeHarvest R2 score: 0.28774055789835873
 
 =====  MACHINE  =====
+
 Nb Rules
 ----------------------
-Decision tree nb rules: 38.0
-Random Forest nb rules: 15000.0
-Covering Algorithm GB nb rules: 5.0
-RuleFit nb rules: 163.0
-Linear relation: 4.0
-SIRUS nb rules: 10.0
-NodeHarvest nb rules: 85.0
+Decision tree nb rules: 10.0
+Random Forest nb rules: 73754.25
+Covering Algorithm RF nb rules: 2.85
+Covering Algorithm GB nb rules: 3.25
+Covering Algorithm SGB nb rules: 3.2
+RuleFit nb rules: 99.85
+SIRUS nb rules: 13.9
+NodeHarvest nb rules: 67.15
+
+Coverage
+----------------------
+Decision tree coverage: 1.0
+Random Forest coverage: 1.0
+Covering Algorithm RF coverage: 0.9972602739726029
+Covering Algorithm GB coverage: 0.9972602739726029
+Covering Algorithm SGB coverage: 0.9976027397260274
+RuleFit coverage: 1.0
+SIRUS coverage: 1.0
+NodeHarvest coverage: 1.0
 
 Interpretability score
 ----------------------
-Decision tree interpretability score: 98.0
-Random Forest interpretability score: 22346.0
-Covering Algorithm GB interpretability score: 9.0
-RuleFit interpretability score: 408.0
-SIRUS interpretability score: 13.9
-NodeHarvest interpretability score: 207.3
+Decision tree interpretability score: 24.2
+Random Forest interpretability score: 319376.45
+Covering Algorithm RF interpretability score: 5.05
+Covering Algorithm GB interpretability score: 6.05
+Covering Algorithm SGB interpretability score: 6.1
+RuleFit interpretability score: 278.15
+SIRUS interpretability score: 21.85
+NodeHarvest interpretability score: 159.0
 
 R2 score
 --------
-Decision tree R2 score: 0.8337098078716311
-Random Forest R2 score: 0.7332084957301814
-Covering Algorithm GB R2 score: 0.8841898262446526
-RuleFit R2 score: 0.8543248848610165
-SIRUS R2 score: 0.6215521790933751
-NodeHarvest R2 score: 0.5233368143903403
-
-MSE
---------
-Decision tree MSE: 0.16629019212836887
-Random Forest MSE: 0.26679150426981874
-Covering Algorithm GB MSE: 0.11581017375534755
-RuleFit MSE: 0.1456751151389834
-SIRUS MSE: 0.37844782090662493
-NodeHarvest MSE: 0.47666318560965965
-
+Decision tree R2 score: 0.18361869985452162
+Random Forest R2 score: 0.06489807102929446
+Covering Algorithm RF R2 score: 0.3969167320936624
+Covering Algorithm GB R2 score: 0.4960127381694267
+Covering Algorithm SGB R2 score: 0.5165615680438426
+RuleFit R2 score: 0.08408103621620044
+SIRUS R2 score: 0.26260093372961946
+NodeHarvest R2 score: 0.31804098894143096
 
 =====  MPG  =====
+
 Nb Rules
 ----------------------
-Decision tree nb rules: 38.0
-Random Forest nb rules: 15000.0
-Covering Algorithm GB nb rules: 6.0
-RuleFit nb rules: 153.0
-Linear relation: 0.0
-SIRUS nb rules: 10.0
-NodeHarvest nb rules: 101.9
+Decision tree nb rules: 10.0
+Random Forest nb rules: 148954.4
+Covering Algorithm RF nb rules: 3.1
+Covering Algorithm GB nb rules: 3.65
+Covering Algorithm SGB nb rules: 3.75
+RuleFit nb rules: 174.7
+SIRUS nb rules: 25.0
+NodeHarvest nb rules: 100.15
+
+Coverage
+----------------------
+Decision tree coverage: 1.0
+Random Forest coverage: 1.0
+Covering Algorithm RF coverage: 0.9998201438848919
+Covering Algorithm GB coverage: 0.9989208633093526
+Covering Algorithm SGB coverage: 0.9992805755395683
+RuleFit coverage: 1.0
+SIRUS coverage: 1.0
+NodeHarvest coverage: 1.0
 
 Interpretability score
 ----------------------
-Decision tree interpretability score: 118.0
-Random Forest interpretability score: 26538.0
-Covering Algorithm GB interpretability score: 12.0
-RuleFit interpretability score: 466.0
-SIRUS interpretability score: 15.0
-NodeHarvest interpretability score: 263.4
+Decision tree interpretability score: 29.0
+Random Forest interpretability score: 623266.0
+Covering Algorithm RF interpretability score: 4.3
+Covering Algorithm GB interpretability score: 6.85
+Covering Algorithm SGB interpretability score: 7.25
+RuleFit interpretability score: 745.15
+SIRUS interpretability score: 45.2
+NodeHarvest interpretability score: 257.85
 
 R2 score
 --------
-Decision tree R2 score: 0.749157715790448
-Random Forest R2 score: 0.8178597753598152
-Covering Algorithm GB R2 score: 0.7556614533655719
-RuleFit R2 score: 0.9086803521645075
-SIRUS R2 score: 0.7428166624473976
-NodeHarvest R2 score: 0.8691654128424414
-
-MSE
---------
-Decision tree MSE: 0.25084228420955185
-Random Forest MSE: 0.18214022464018473
-Covering Algorithm GB MSE: 0.24433854663442806
-RuleFit MSE: 0.09131964783549239
-SIRUS MSE: 0.25718333755260236
-NodeHarvest MSE: 0.13083458715755863
-
+Decision tree R2 score: 0.26839228178685415
+Random Forest R2 score: 0.1358494951638679
+Covering Algorithm RF R2 score: 0.28436435764137313
+Covering Algorithm GB R2 score: 0.29747443701844944
+Covering Algorithm SGB R2 score: 0.29274038134105673
+RuleFit R2 score: 0.13494465247726772
+SIRUS R2 score: 0.20573117782295003
+NodeHarvest R2 score: 0.14849253783885263
 
 =====  BOSTON  =====
+
 Nb Rules
 ----------------------
-Decision tree nb rules: 38.0
-Random Forest nb rules: 15000.0
-Covering Algorithm GB nb rules: 7.0
-RuleFit nb rules: 328.0
-Linear relation: 0.0
-SIRUS nb rules: 10.0
-NodeHarvest nb rules: 139.9
+Decision tree nb rules: 10.0
+Random Forest nb rules: 212961.05
+Covering Algorithm RF nb rules: 4.9
+Covering Algorithm GB nb rules: 6.8
+Covering Algorithm SGB nb rules: 6.35
+RuleFit nb rules: 264.95
+SIRUS nb rules: 25.0
+NodeHarvest nb rules: 139.85
+
+Coverage
+----------------------
+Decision tree coverage: 1.0
+Random Forest coverage: 1.0
+Covering Algorithm RF coverage: 0.9939265536723163
+Covering Algorithm GB coverage: 0.993361581920904
+Covering Algorithm SGB coverage: 0.9932203389830508
+RuleFit coverage: 1.0
+SIRUS coverage: 0.9997175141242938
+NodeHarvest coverage: 1.0
 
 Interpretability score
 ----------------------
-Decision tree interpretability score: 116.0
-Random Forest interpretability score: 21292.0
-Covering Algorithm GB interpretability score: 12.0
-RuleFit interpretability score: 1099.0
-SIRUS interpretability score: 13.0
-NodeHarvest interpretability score: 341.4
+Decision tree interpretability score: 26.3
+Random Forest interpretability score: 1270252.25
+Covering Algorithm RF interpretability score: 10.9
+Covering Algorithm GB interpretability score: 15.15
+Covering Algorithm SGB interpretability score: 13.85
+RuleFit interpretability score: 1207.65
+SIRUS interpretability score: 38.5
+NodeHarvest interpretability score: 345.4
 
 R2 score
 --------
-Decision tree R2 score: 0.6480190539430739
-Random Forest R2 score: 0.753667318061299
-Covering Algorithm GB R2 score: 0.4553097019746895
-RuleFit R2 score: 0.855639093867046
-SIRUS R2 score: 0.6716903589168312
-NodeHarvest R2 score: 0.7776640851686863
-
-MSE
---------
-Decision tree MSE: 0.3519809460569262
-Random Forest MSE: 0.24633268193870098
-Covering Algorithm GB MSE: 0.5446902980253105
-RuleFit MSE: 0.14436090613295405
-SIRUS MSE: 0.32830964108316885
-NodeHarvest MSE: 0.2223359148313136
-
-
-=====  ABALONE  =====
-Nb Rules
-----------------------
-Decision tree nb rules: 38.0
-Random Forest nb rules: 15000.0
-Covering Algorithm GB nb rules: 67.0
-RuleFit nb rules: 216.0
-Linear relation: 0.0
-SIRUS nb rules: 10.0
-NodeHarvest nb rules: 80.5
-
-Interpretability score
-----------------------
-Decision tree interpretability score: 72.0
-Random Forest interpretability score: 16802.0
-Covering Algorithm GB interpretability score: 152.0
-RuleFit interpretability score: 579.0
-SIRUS interpretability score: 11.8
-NodeHarvest interpretability score: 194.8
-
-R2 score
---------
-Decision tree R2 score: 0.3325476105900293
-Random Forest R2 score: 0.40245464372902695
-Covering Algorithm GB R2 score: 0.27712025141740126
-RuleFit R2 score: 0.5391955871063245
-SIRUS R2 score: 0.3599191469644049
-NodeHarvest R2 score: 0.43483748626734087
-
-MSE
---------
-Decision tree MSE: 0.6674523894099706
-Random Forest MSE: 0.597545356270973
-Covering Algorithm GB MSE: 0.722879748582599
-RuleFit MSE: 0.4608044128936754
-SIRUS MSE: 0.6400808530355953
-NodeHarvest MSE: 0.5651625137326591
+Decision tree R2 score: 0.2862620854460488
+Random Forest R2 score: 0.13924126920188618
+Covering Algorithm RF R2 score: 0.4481167324752072
+Covering Algorithm GB R2 score: 0.4462894214012175
+Covering Algorithm SGB R2 score: 0.461532197471312
+RuleFit R2 score: 0.12218207600649811
+SIRUS R2 score: 0.2520715085692704
+NodeHarvest R2 score: 0.19763888815937736
 
 =====  STUDENT_POR  =====
 
 Nb Rules
 ----------------------
-Decision tree nb rules: 38.0
-Random Forest nb rules: 15000.0
-Covering Algorithm GB nb rules: 54.0
-RuleFit nb rules: 168.0
-Linear relation: 0.0
-SIRUS nb rules: 10.0
-NodeHarvest nb rules: 64.4
+Decision tree nb rules: 10.0
+Random Forest nb rules: 199278.65
+Covering Algorithm RF nb rules: 18.45
+Covering Algorithm GB nb rules: 32.0
+Covering Algorithm SGB nb rules: 37.3
+RuleFit nb rules: 277.95
+SIRUS nb rules: 15.35
+NodeHarvest nb rules: 78.5
+
+Coverage
+----------------------
+Decision tree coverage: 1.0
+Random Forest coverage: 1.0
+Covering Algorithm RF coverage: 0.9859030837004406
+Covering Algorithm GB coverage: 0.9806167400881058
+Covering Algorithm SGB coverage: 0.9792951541850222
+RuleFit coverage: 1.0
+SIRUS coverage: 1.0
+NodeHarvest coverage: 1.0
 
 Interpretability score
 ----------------------
-Decision tree interpretability score: 156.0
-Random Forest interpretability score: 28906.0
-Covering Algorithm GB interpretability score: 148.0
-RuleFit interpretability score: 577.0
-SIRUS interpretability score: 16.4
-NodeHarvest interpretability score: 186.7
+Decision tree interpretability score: 37.75
+Random Forest interpretability score: 1838107.25
+Covering Algorithm RF interpretability score: 51.4
+Covering Algorithm GB interpretability score: 86.75
+Covering Algorithm SGB interpretability score: 100.05
+RuleFit interpretability score: 1280.4
+SIRUS interpretability score: 26.2
+NodeHarvest interpretability score: 228.45
 
 R2 score
 --------
-Decision tree R2 score: 0.24010125569571547
-Random Forest R2 score: 0.21655745989300365
-Covering Algorithm GB R2 score: 0.03835477572751167
-RuleFit R2 score: 0.22668404970405315
-SIRUS R2 score: 0.21922769626038702
-NodeHarvest R2 score: 0.2550021150584382
+Decision tree R2 score: 1.545106832765149
+Random Forest R2 score: 0.7360874588599915
+Covering Algorithm RF R2 score: 0.8593007108589942
+Covering Algorithm GB R2 score: 1.0051501894038266
+Covering Algorithm SGB R2 score: 1.0139877669863966
+RuleFit R2 score: 0.898706588076063
+SIRUS R2 score: 0.7663494810868973
+NodeHarvest R2 score: 0.7594594379360788
 
-MSE
---------
-Decision tree MSE: 0.7598987443042845
-Random Forest MSE: 0.7834425401069963
-Covering Algorithm GB MSE: 0.9616452242724882
-RuleFit MSE: 0.7733159502959469
-SIRUS MSE: 0.780772303739613
-NodeHarvest MSE: 0.7449978849415618
+Process finished with exit code 0

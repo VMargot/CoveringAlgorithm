@@ -185,6 +185,8 @@ def select_rs(rs: Union[List[Rule], RuleSet],
     nb_rules = len(rs)
 
     for i in range(id_rule, nb_rules):
+        if selected_rs.calc_coverage() == 1.0:
+            break
         rs_copy = copy.deepcopy(selected_rs)
         new_rules = rs[i]
         # Test union criteria for each rule in the current selected RuleSet
@@ -213,14 +215,14 @@ def get_significant(rules_list, ymean, beta, gamma, sigma2):
     else:
         significant_selected_rs = RuleSet([])
 
-    return significant_selected_rs
+    return significant_selected_rs, significant_rules
 
 
 def add_insignificant_rules(rules_list, rs, epsilon, sigma2, gamma):
-    def is_significant(rule, epsilon, sigma2):
+    def is_insignificant(rule, epsilon, sigma2):
         return epsilon >= math.sqrt(max(0, rule.var - sigma2))
 
-    insignificant_rule = filter(lambda rule: is_significant(rule, epsilon, sigma2),
+    insignificant_rule = filter(lambda rule: is_insignificant(rule, epsilon, sigma2),
                                 rules_list)
     insignificant_rule = list(insignificant_rule)
     insignificant_rs = RuleSet(insignificant_rule)
@@ -255,10 +257,11 @@ def find_covering(rules_list, y, sigma2=None,
     beta = pow(n_train, alpha / 2. - 1. / 4)
     epsilon = beta * np.std(y)
 
-    significant_selected_rs = get_significant(sub_rules_list, np.mean(y),
-                                              beta, gamma, sigma2)
+    significant_selected_rs, significant_rules = get_significant(sub_rules_list, np.mean(y),
+                                                                 beta, gamma, sigma2)
 
     if significant_selected_rs.calc_coverage() < 1.0:
+        sub_rules_list = list(filter(lambda r: r not in significant_rules, sub_rules_list))
         selected_rs = add_insignificant_rules(sub_rules_list, significant_selected_rs,
                                               epsilon, sigma2, gamma)
     else:
@@ -289,6 +292,7 @@ def calc_pred(ruleset, ytrain, x):
     no_activation_vector = np.array(no_activation_vector,
                                     dtype='int')
 
+    # Activation of the intersection of all activated rules at each row
     dot_activation = np.dot(prediction_matrix, activation_matrix)
     dot_activation = np.array([np.equal(act, nb_rules) for act, nb_rules in
                                zip(dot_activation, nb_rules_active)], dtype='int')
@@ -297,9 +301,9 @@ def calc_pred(ruleset, ytrain, x):
     cells = ((dot_activation - no_activation_vector) > 0)
 
     # Calculation of the conditional expectation in each cell
-    prediction_vector = [calc_prediction(act, ytrain) for act in cells]
+    prediction_vector = [calc_prediction(act, ytrain) if sum(act) > 0 else
+                         np.mean(ytrain) for act in cells]
     prediction_vector = np.array(prediction_vector)
-    prediction_vector[prediction_vector == 0] = np.mean(ytrain)
     return prediction_vector
 
 
