@@ -19,6 +19,8 @@ import CoveringAlgorithm.CA as CA
 import CoveringAlgorithm.covering_tools as ct
 from CoveringAlgorithm.ruleset import RuleSet
 
+import RICE
+
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -121,18 +123,19 @@ if __name__ == '__main__':
     lmax = 3
     learning_rate = 0.1
 
-    nb_simu = 20
+    nb_simu = 10
     res_dict = {}
     #  Data parameters
-    seed = 2020
+    seed = 42
     for data_name in [
-        'diabetes',
-                      'prostate',
-                      'ozone',
-                      'machine',
-                      'mpg',
+                      # 'prostate',
+                      # 'diabetes',
+                      # 'prostate',
+                      # 'ozone',
+                      # 'machine',
+                      # 'mpg',
                       'boston',
-                      'student_por',
+                      # 'student_por',
                       #'abalone'
                       ]:
         print('')
@@ -149,8 +152,8 @@ if __name__ == '__main__':
         res_dict['DT'] = []
         res_dict['RF'] = []
         res_dict['CA_RF'] = []
-        res_dict['CA_GB'] = []
-        res_dict['CA_SGB'] = []
+        # res_dict['CA_GB'] = []
+        # res_dict['CA_SGB'] = []
         res_dict['RuleFit'] = []
         res_dict['Sirus'] = []
         res_dict['NH'] = []
@@ -244,13 +247,13 @@ if __name__ == '__main__':
             n = X_train.shape[0]
             subsample = min(0.5, (100 + 6 * np.sqrt(n)) / n)
             ca_sgb = CA.CA(alpha=alpha, gamma=gamma,
-                          tree_size=tree_size,
-                          max_rules=max_rules,
-                          generator_func=GradientBoostingRegressor,
-                          lmax=lmax,
-                          subsample=subsample,
-                          learning_rate=learning_rate,
-                          seed=seed)
+                           tree_size=tree_size,
+                           max_rules=max_rules,
+                           generator_func=GradientBoostingRegressor,
+                           lmax=lmax,
+                           subsample=subsample,
+                           learning_rate=learning_rate,
+                           seed=seed)
             ca_sgb.fit(X=X_train, y=y_train, features=features)
 
             seed += 1
@@ -275,31 +278,41 @@ if __name__ == '__main__':
                                                      X_train.max(axis=0))
             rulefit_rs = RuleSet(rulefit_rules)
 
+            #  ## RICE
+            rice = RICE.Learning(gamma=gamma, alpha=alpha, l_max=lmax, k=150)
+            rice.fit(X_train, y_train, features)
+
             #  ## Errors calculation
             pred_tree = tree.predict(X_test)
             pred_rf = regr_rf.predict(X_test)
             pred_CA_rf = ca_rf.predict(X_test)
-            pred_CA_gb = ca_gb.predict(X_test)
-            pred_CA_sgb = ca_sgb.predict(X_test)
+            # pred_CA_gb = ca_gb.predict(X_test)
+            # pred_CA_sgb = ca_sgb.predict(X_test)
             pred_rulefit = rule_fit.predict(X_test)
+            pred_rice, empty_cells_s, empty_cells_i = rice.predict(X_test)
+            bad_pred = np.where(pred_rice == 0)[0]
+            good_pred = np.where(pred_rice != 0)[0]
+            no_pred_rice = len(bad_pred)
 
             mse_tree = np.mean((y_test - pred_tree) ** 2) / deno_mse
             mse_rf = np.mean((y_test - pred_rf) ** 2) / deno_mse
             mse_CA_rf = np.mean((y_test - pred_CA_rf) ** 2) / deno_mse
-            mse_CA_gb = np.mean((y_test - pred_CA_gb) ** 2) / deno_mse
-            mse_CA_sgb = np.mean((y_test - pred_CA_sgb) ** 2) / deno_mse
+            # mse_CA_gb = np.mean((y_test - pred_CA_gb) ** 2) / deno_mse
+            # mse_CA_sgb = np.mean((y_test - pred_CA_sgb) ** 2) / deno_mse
             mse_rulefit = np.mean((y_test - pred_rulefit) ** 2) / deno_mse
             mse_sirus = np.mean((y_test - pred_sirus) ** 2) / deno_mse
             mse_nh = np.mean((y_test - pred_nh) ** 2) / deno_mse
+            mse_rice = np.mean((y_test[good_pred] - pred_rice[good_pred]) ** 2) / deno_mse
 
             cov_tree = tree_rs.calc_coverage(X_train)
             cov_rf = rf_rs.calc_coverage(X_train)
             cov_CA_rf = ca_rf.selected_rs.calc_coverage()
-            cov_CA_gb = ca_gb.selected_rs.calc_coverage()
-            cov_CA_sgb = ca_sgb.selected_rs.calc_coverage()
+            # cov_CA_gb = ca_gb.selected_rs.calc_coverage()
+            # cov_CA_sgb = ca_sgb.selected_rs.calc_coverage()
             cov_rulefit = rulefit_rs.calc_coverage(X_train)
             cov_sirus = sirus_rs.calc_coverage(X_train)
             cov_nh = nh_rs.calc_coverage(X_train)
+            cov_rice = rice.selected_rs.calc_coverage()
 
             seed += 1
 
@@ -311,12 +324,12 @@ if __name__ == '__main__':
                 res_dict['CA_RF'] = [[len(ca_rf.selected_rs), cov_CA_rf,
                                       ct.inter(ca_rf.selected_rs),  r2_score(y_test, pred_CA_rf),
                                       mse_CA_rf]]
-                res_dict['CA_GB'] = [[len(ca_gb.selected_rs), cov_CA_gb,
-                                      ct.inter(ca_gb.selected_rs), r2_score(y_test, pred_CA_gb),
-                                      mse_CA_gb]]
-                res_dict['CA_SGB'] = [[len(ca_sgb.selected_rs), cov_CA_sgb,
-                                      ct.inter(ca_sgb.selected_rs), r2_score(y_test, pred_CA_sgb),
-                                      mse_CA_sgb]]
+                # res_dict['CA_GB'] = [[len(ca_gb.selected_rs), cov_CA_gb,
+                #                       ct.inter(ca_gb.selected_rs), r2_score(y_test, pred_CA_gb),
+                #                       mse_CA_gb]]
+                # res_dict['CA_SGB'] = [[len(ca_sgb.selected_rs), cov_CA_sgb,
+                #                       ct.inter(ca_sgb.selected_rs), r2_score(y_test, pred_CA_sgb),
+                #                       mse_CA_sgb]]
                 res_dict['RuleFit'] = [[len(rulefit_rules), cov_rulefit,
                                         ct.inter(rulefit_rules), r2_score(y_test, pred_rulefit),
                                         mse_rulefit]]
@@ -324,6 +337,9 @@ if __name__ == '__main__':
                                       r2_score(y_test, pred_sirus), mse_sirus]]
                 res_dict['NH'] = [[len(nh_rs), cov_nh, ct.inter(nh_rs), r2_score(y_test, pred_nh),
                                    mse_nh]]
+                res_dict['RICE'] = [[len(rice.selected_rs), cov_rice, ct.inter(rice.selected_rs),
+                                     r2_score(y_test[good_pred], pred_rice[good_pred]), mse_rice,
+                                     no_pred_rice]]
 
             else:
                 res_dict['DT'] = np.append(res_dict['DT'], [[len(tree_rules), cov_tree,
@@ -339,16 +355,16 @@ if __name__ == '__main__':
                                                                    ct.inter(ca_rf.selected_rs),
                                                                    r2_score(y_test, pred_CA_rf),
                                                                    mse_CA_rf]], axis=0)
-                res_dict['CA_GB'] = np.append(res_dict['CA_GB'], [[len(ca_gb.selected_rs),
-                                                                   cov_CA_gb,
-                                                                   ct.inter(ca_gb.selected_rs),
-                                                                   r2_score(y_test, pred_CA_gb),
-                                                                   mse_CA_gb]], axis=0)
-                res_dict['CA_SGB'] = np.append(res_dict['CA_SGB'], [[len(ca_sgb.selected_rs),
-                                                                     cov_CA_sgb,
-                                                                     ct.inter(ca_sgb.selected_rs),
-                                                                     r2_score(y_test, pred_CA_sgb),
-                                                                     mse_CA_sgb]], axis=0)
+                # res_dict['CA_GB'] = np.append(res_dict['CA_GB'], [[len(ca_gb.selected_rs),
+                #                                                    cov_CA_gb,
+                #                                                    ct.inter(ca_gb.selected_rs),
+                #                                                    r2_score(y_test, pred_CA_gb),
+                #                                                    mse_CA_gb]], axis=0)
+                # res_dict['CA_SGB'] = np.append(res_dict['CA_SGB'], [[len(ca_sgb.selected_rs),
+                #                                                      cov_CA_sgb,
+                #                                                      ct.inter(ca_sgb.selected_rs),
+                #                                                      r2_score(y_test, pred_CA_sgb),
+                #                                                      mse_CA_sgb]], axis=0)
                 res_dict['RuleFit'] = np.append(res_dict['RuleFit'], [[len(rulefit_rules),
                                                                        cov_rulefit,
                                                                        ct.inter(rulefit_rules),
@@ -362,6 +378,11 @@ if __name__ == '__main__':
                 res_dict['NH'] = np.append(res_dict['NH'], [[len(nh_rs), cov_nh, ct.inter(nh_rs),
                                                              r2_score(y_test, pred_nh),
                                                              mse_nh]], axis=0)
+                res_dict['RICE'] = np.append(res_dict['RICE'], [[len(rice.selected_rs), cov_rice,
+                                                                 ct.inter(rice.selected_rs),
+                                                                 r2_score(y_test[good_pred],
+                                                                          pred_rice[good_pred]),
+                                                                 mse_rice, no_pred_rice]], axis=0)
 
         json_name = data_name + '.json'
         json_dict = {}
@@ -372,10 +393,11 @@ if __name__ == '__main__':
         f.write(json_f)
         f.close()
 
-        rules_path = r'/home/vincent/Documents/EJS/Codes/'
+        rules_path = r'/home/vincent/Documents/EJS/'
         ca_rf.selected_rs.to_df().to_csv(rules_path + data_name + '_CA_RF.csv')
-        ca_gb.selected_rs.to_df().to_csv(rules_path + data_name + '_CA_GB.csv')
-        ca_sgb.selected_rs.to_df().to_csv(rules_path + data_name + '_CA_SGB.csv')
+        # ca_gb.selected_rs.to_df().to_csv(rules_path + data_name + '_CA_GB.csv')
+        # ca_sgb.selected_rs.to_df().to_csv(rules_path + data_name + '_CA_SGB.csv')
+        rice.selected_rs.to_df().to_csv(rules_path + data_name + '_rice.csv')
 
         # ## Results.
         print('')
@@ -384,11 +406,12 @@ if __name__ == '__main__':
         print('Decision tree nb rules:', np.mean(res_dict['DT'][:, 0]))
         print('Random Forest nb rules:', np.mean(res_dict['RF'][:, 0]))
         print('Covering Algorithm RF nb rules:', np.mean(res_dict['CA_RF'][:, 0]))
-        print('Covering Algorithm GB nb rules:', np.mean(res_dict['CA_GB'][:, 0]))
-        print('Covering Algorithm SGB nb rules:', np.mean(res_dict['CA_SGB'][:, 0]))
+        # print('Covering Algorithm GB nb rules:', np.mean(res_dict['CA_GB'][:, 0]))
+        # print('Covering Algorithm SGB nb rules:', np.mean(res_dict['CA_SGB'][:, 0]))
         print('RuleFit nb rules:', np.mean(res_dict['RuleFit'][:, 0]))
         print('SIRUS nb rules:', np.mean(res_dict['Sirus'][:, 0]))
         print('NodeHarvest nb rules:', np.mean(res_dict['NH'][:, 0]))
+        print('RICE nb rules:', np.mean(res_dict['RICE'][:, 0]))
 
         print('')
         print('Coverage')
@@ -396,11 +419,12 @@ if __name__ == '__main__':
         print('Decision tree coverage:', np.mean(res_dict['DT'][:, 1]))
         print('Random Forest coverage:', np.mean(res_dict['RF'][:, 1]))
         print('Covering Algorithm RF coverage:', np.mean(res_dict['CA_RF'][:, 1]))
-        print('Covering Algorithm GB coverage:', np.mean(res_dict['CA_GB'][:, 1]))
-        print('Covering Algorithm SGB coverage:', np.mean(res_dict['CA_SGB'][:, 1]))
+        # print('Covering Algorithm GB coverage:', np.mean(res_dict['CA_GB'][:, 1]))
+        # print('Covering Algorithm SGB coverage:', np.mean(res_dict['CA_SGB'][:, 1]))
         print('RuleFit coverage:', np.mean(res_dict['RuleFit'][:, 1]))
         print('SIRUS coverage:', np.mean(res_dict['Sirus'][:, 1]))
         print('NodeHarvest coverage:', np.mean(res_dict['NH'][:, 1]))
+        print('RICE coverage:', np.mean(res_dict['RICE'][:, 1]))
 
         print('')
         print('Interpretability score')
@@ -408,11 +432,12 @@ if __name__ == '__main__':
         print('Decision tree interpretability score:', np.mean(res_dict['DT'][:, 2]))
         print('Random Forest interpretability score:', np.mean(res_dict['RF'][:, 2]))
         print('Covering Algorithm RF interpretability score:', np.mean(res_dict['CA_RF'][:, 2]))
-        print('Covering Algorithm GB interpretability score:', np.mean(res_dict['CA_GB'][:, 2]))
-        print('Covering Algorithm SGB interpretability score:', np.mean(res_dict['CA_SGB'][:, 2]))
+        # print('Covering Algorithm GB interpretability score:', np.mean(res_dict['CA_GB'][:, 2]))
+        # print('Covering Algorithm SGB interpretability score:', np.mean(res_dict['CA_SGB'][:, 2]))
         print('RuleFit interpretability score:', np.mean(res_dict['RuleFit'][:, 2]))
         print('SIRUS interpretability score:', np.mean(res_dict['Sirus'][:, 2]))
         print('NodeHarvest interpretability score:', np.mean(res_dict['NH'][:, 2]))
+        print('RICE interpretability score:', np.mean(res_dict['RICE'][:, 2]))
 
         print('')
         print('R2 score')  # Percentage of the unexplained variance
@@ -420,8 +445,12 @@ if __name__ == '__main__':
         print('Decision tree R2 score:', 1.0 - np.mean(res_dict['DT'][:, 3]))
         print('Random Forest R2 score:', 1.0 - np.mean(res_dict['RF'][:, 3]))
         print('Covering Algorithm RF R2 score:', 1.0 - np.mean(res_dict['CA_RF'][:, 3]))
-        print('Covering Algorithm GB R2 score:', 1.0 - np.mean(res_dict['CA_GB'][:, 3]))
-        print('Covering Algorithm SGB R2 score:', 1.0 - np.mean(res_dict['CA_SGB'][:, 3]))
+        # print('Covering Algorithm GB R2 score:', 1.0 - np.mean(res_dict['CA_GB'][:, 3]))
+        # print('Covering Algorithm SGB R2 score:', 1.0 - np.mean(res_dict['CA_SGB'][:, 3]))
         print('RuleFit R2 score:', 1.0 - np.mean(res_dict['RuleFit'][:, 3]))
         print('SIRUS R2 score:', 1.0 - np.mean(res_dict['Sirus'][:, 3]))
         print('NodeHarvest R2 score:', 1.0 - np.mean(res_dict['NH'][:, 3]))
+        print('RICE R2 score:', 1.0 - np.mean(res_dict['RICE'][:, 3]))
+
+        print('')
+        print('RICE average bad_cells', np.mean(res_dict['RICE'][:, 5]) / len(y_test))

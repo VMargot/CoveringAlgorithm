@@ -143,6 +143,7 @@ class CA:
                                                                  max_leaf_nodes=self.tree_size,
                                                                  learning_rate=self.learning_rate,
                                                                  subsample=subsample,
+
                                                                  random_state=self.seed,
                                                                  max_depth=100)
             elif mode.lower() in ['classification', 'classif', 'c']:
