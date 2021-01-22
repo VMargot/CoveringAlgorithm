@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 import tqdm
-import pickle
 import math
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor, AdaBoostRegressor
 from sklearn.tree import DecisionTreeRegressor
@@ -196,6 +195,4 @@ for i in tqdm.tqdm(range(nb_simu)):
     df.iloc[i]['mse* RuleFit'] = np.mean(np.abs(y_true - pred_rulefit)**2) / deno_ytrue
 
 print(dict_count)
-
-df.to_csv('/home/vincent/Dropbox/Thèse/Papers/EJS/Codes/monte_carlo.csv')
-pickle.dump(dict_count, open('/home/vincent/Dropbox/Thèse/Papers/EJS/Codes/dict_count','wb'))
+print(df)
