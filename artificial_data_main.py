@@ -11,6 +11,9 @@ import rulefit
 
 import CoveringAlgorithm.CA as CA
 import CoveringAlgorithm.covering_tools as ct
+from CoveringAlgorithm.functions import extract_rules_rulefit
+from ruleset.ruleset import RuleSet
+from rule.rule_utils import extract_rules_from_tree
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -64,8 +67,9 @@ for i in tqdm.tqdm(range(nb_simu)):
     X_test = np.random.randint(10, size=(nRows, nCols))
     X_test = X_test / 10.
 
-    y_true = 9 * np.exp(-3 * (1 - X_test[:, 0]) ** 2) * np.exp(-3 * (1 - X_test[:, 1]) ** 2) * np.exp(-3 * (1 - X_test[:, 2]) ** 2)\
-             - 0.8 * np.exp(-2 * (X_test[:, 3] - X_test[:, 4])) + 2 * np.sin(math.pi * X_test[:, 5]) ** 2 - 2.5 * (
+    y_true = 9 * np.exp(-3 * (1 - X_test[:, 0]) ** 2) * np.exp(-3 * (1 - X_test[:, 1]) ** 2)\
+             * np.exp(-3 * (1 - X_test[:, 2]) ** 2) - 0.8 * np.exp(-2 * (X_test[:, 3] - X_test[:, 4]))\
+             + 2 * np.sin(math.pi * X_test[:, 5]) ** 2 - 2.5 * (
                          X_test[:, 6] - X_test[:, 7])
 
     sigma2_2 = 1 / 4. * np.var(y_true)  # two-to-one signal-to-noise ratio
@@ -78,8 +82,9 @@ for i in tqdm.tqdm(range(nb_simu)):
     tree = DecisionTreeRegressor(max_leaf_nodes=10, random_state=seed)
     tree.fit(X, y)
 
-    tree_rules = ct.extract_rules_from_tree(tree, features, X.min(axis=0),
-                                            X.max(axis=0))
+    tree_rules = extract_rules_from_tree(tree, xmins=X.min(axis=0), xmaxs=X.max(axis=0),
+                                         features_names=features, get_leaf=True)
+    tree_rs = RuleSet(tree_rules)
 
     # ## Random Forests generation
     regr_rf = RandomForestRegressor(n_estimators=10, random_state=seed)
@@ -87,8 +92,9 @@ for i in tqdm.tqdm(range(nb_simu)):
 
     rf_rule_list = []
     for tree in regr_rf.estimators_:
-        rf_rule_list += ct.extract_rules_from_tree(tree, features, X.min(axis=0),
-                                                   X.max(axis=0))
+        rf_rule_list += extract_rules_from_tree(tree, xmins=X.min(axis=0), xmaxs=X.max(axis=0),
+                                                features_names=features, get_leaf=True)
+    rf_rs = RuleSet(rf_rule_list)
 
     # ## Covering Algorithm RandomForest
     ca_rf = CA.CA(alpha=alpha, gamma=gamma,
@@ -98,9 +104,9 @@ for i in tqdm.tqdm(range(nb_simu)):
                   lmax=lmax,
                   n_jobs=-1,
                   seed=seed)
-    ca_rf.fit(X=X, y=y, features=features)
+    ca_rf.fit(xs=X, y=y, features=features)
 
-    counter = ct.get_variables_count(ca_rf.selected_rs)
+    counter = ca_rf.selected_rs.get_variables_count()
     dict_count['CA_RF'].append(counter)
 
     # ## Covering Algorithm GradientBoosting
@@ -112,9 +118,9 @@ for i in tqdm.tqdm(range(nb_simu)):
                   learning_rate=learning_rate,
                   n_jobs=-1,
                   seed=seed)
-    ca_gb.fit(X=X, y=y, features=features)
+    ca_gb.fit(xs=X, y=y, features=features)
 
-    counter = ct.get_variables_count(ca_gb.selected_rs)
+    counter = ca_gb.selected_rs.get_variables_count()
     dict_count['CA_GB'].append(counter)
 
     # ## Covering Algorithm
@@ -127,9 +133,9 @@ for i in tqdm.tqdm(range(nb_simu)):
                   learning_rate=learning_rate,
                   n_jobs=-1,
                   seed=seed)
-    ca_ad.fit(X=X, y=y, features=features)
+    ca_ad.fit(xs=X, y=y, features=features)
 
-    counter = ct.get_variables_count(ca_ad.selected_rs)
+    counter = ca_ad.selected_rs.get_variables_count()
     dict_count['CA_AD'].append(counter)
 
     # ## RuleFit
@@ -144,8 +150,7 @@ for i in tqdm.tqdm(range(nb_simu)):
     rules = rules[rules.coef != 0].sort_values(by="support")
     rules = rules.loc[rules['type'] == 'rule']
 
-    rulefit_rules = ct.extract_rules_rulefit(rules, features, X.min(axis=0),
-                                             X.max(axis=0))
+    rulefit_rules = extract_rules_rulefit(rules, features, X.min(axis=0), X.max(axis=0))
 
     # ## Errors calculation
     pred_tree = tree.predict(X_test)
@@ -169,12 +174,12 @@ for i in tqdm.tqdm(range(nb_simu)):
     df.iloc[i]['Rules CA_AD'] = len(ca_ad.selected_rs)
     df.iloc[i]['Rules RuleFit'] = len(rulefit_rules)
 
-    df.iloc[i]['Int DT'] = ct.inter(tree_rules)
-    df.iloc[i]['Int RF'] = ct.inter(rf_rule_list)
-    df.iloc[i]['Int CA_RF'] = ct.inter(ca_rf.selected_rs)
-    df.iloc[i]['Int CA_GB'] = ct.inter(ca_gb.selected_rs)
-    df.iloc[i]['Int CA_AD'] = ct.inter(ca_ad.selected_rs)
-    df.iloc[i]['Int RuleFit'] = ct.inter(rulefit_rules)
+    df.iloc[i]['Int DT'] = ct.interpretability_index(tree_rules)
+    df.iloc[i]['Int RF'] = ct.interpretability_index(rf_rule_list)
+    df.iloc[i]['Int CA_RF'] = ct.interpretability_index(ca_rf.selected_rs)
+    df.iloc[i]['Int CA_GB'] = ct.interpretability_index(ca_gb.selected_rs)
+    df.iloc[i]['Int CA_AD'] = ct.interpretability_index(ca_ad.selected_rs)
+    df.iloc[i]['Int RuleFit'] = ct.interpretability_index(rulefit_rules)
 
     df.iloc[i]['mse DT'] = np.mean(np.abs(y_test - pred_tree)**2) / deno_y
     df.iloc[i]['mse* DT'] = np.mean(np.abs(y_true - pred_tree)**2) / deno_ytrue

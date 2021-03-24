@@ -1,6 +1,11 @@
-
+from typing import List
+import copy
 import numpy as np
+import pandas as pd
 from sklearn.exceptions import NotFittedError
+from rule.rule import Rule
+from ruleset.ruleset import RuleSet
+from condition.hyperrectanglecondition import HyperrectangleCondition
 
 
 def check_is_fitted(estimator):
@@ -91,41 +96,6 @@ def aae_function(prediction_vector: np.ndarray, y: np.ndarray):
     return error_vector / median_error
 
 
-# def make_condition(rule: Rule):
-#     """
-#     Evaluate all suitable rules (i.e satisfying all criteria)
-#     on a given feature.
-#     Parameters
-#     ----------
-#     rule : {rule type}
-#            A rule
-#
-#     Return
-#     ------
-#     conditions_str : {str type}
-#                      A new string for the condition of the rule
-#     """
-#     conditions = rule.get_param('conditions').get_attr()
-#     length = rule.get_param('length')
-#     conditions_str = ''
-#     for i in range(length):
-#         if i > 0:
-#             conditions_str += ' & '
-#
-#         conditions_str += conditions[0][i]
-#         if conditions[2][i] == conditions[3][i]:
-#             conditions_str += ' = '
-#             conditions_str += str(conditions[2][i])
-#         else:
-#             conditions_str += r' $\in$ ['
-#             conditions_str += str(conditions[2][i])
-#             conditions_str += ', '
-#             conditions_str += str(conditions[3][i])
-#             conditions_str += ']'
-#
-#     return conditions_str
-
-
 def calc_coverage(vect: np.ndarray):
     """
     Compute the coverage rate of an activation vector
@@ -146,7 +116,7 @@ def calc_coverage(vect: np.ndarray):
     return np.dot(u, u) / float(u.size)
 
 
-def calc_prediction(activation_vector: np.ndarray, y: np.ndarray):
+def calc_conditional_mean(activation_vector: np.ndarray, y: np.ndarray):
     """
     Compute the empirical conditional expectation of y
     knowing x
@@ -264,3 +234,100 @@ def dist(u: np.ndarray, v: np.ndarray):
     deno = min(np.dot(u, u),
                np.dot(v, v))
     return 1 - num / deno
+
+
+def extract_rules_rulefit(rules_df: pd.DataFrame,
+                          features_names: List[str],
+                          bmins_list: List[float],
+                          bmaxs_list: List[float]) -> RuleSet:
+    rulefit_ruleset = RuleSet()
+
+    for rule in rules_df['rule'].values:
+        if '&' in rule:
+            rule_split = rule.split(' & ')
+        else:
+            rule_split = [rule]
+
+        features_name = []
+        features_index = []
+        bmin = []
+        bmax = []
+        xmax = []
+        xmin = []
+
+        for sub_rule in rule_split:
+            sub_rule = sub_rule.replace('=', '')
+
+            if '>' in sub_rule:
+                sub_rule = sub_rule.split(' > ')
+                if 'feature_' in sub_rule[0]:
+                    feat_id = sub_rule[0].split('_')[-1]
+                    feat_id = int(feat_id)
+                    features_name += [features_names[feat_id]]
+                else:
+                    features_name += [sub_rule[0]]
+                    feat_id = features_names.index(sub_rule[0])
+                features_index += [feat_id]
+                bmin += [float(sub_rule[-1])]
+                bmax += [bmaxs_list[feat_id]]
+            else:
+                sub_rule = sub_rule.split(' < ')
+                if 'feature_' in sub_rule[0]:
+                    feat_id = sub_rule[0].split('_')[-1]
+                    feat_id = int(feat_id)
+                    features_name += [features_names[feat_id]]
+                else:
+                    features_name += [sub_rule[0]]
+                    feat_id = features_names.index(sub_rule[0])
+                features_index += [feat_id]
+                bmax += [float(sub_rule[-1])]
+                bmin += [bmins_list[feat_id]]
+
+            xmax += [bmaxs_list[feat_id]]
+            xmin += [bmins_list[feat_id]]
+
+        new_cond = HyperrectangleCondition(features_names=features_name,
+                                           features_indexes=features_index,
+                                           bmins=bmin, bmaxs=bmax)
+        new_rg = Rule(copy.deepcopy(new_cond))
+        rulefit_ruleset += new_rg
+
+    return rulefit_ruleset
+
+
+def make_rs_from_r(df: pd.DataFrame, features_list: List[str], xmin: List[float], xmax: List[float]) -> RuleSet:
+    rules = df['Rules'].values
+    r_ruleset = RuleSet()
+    for i in range(len(rules)):
+        rl_i = rules[i].split(' AND ')
+        cp = len(rl_i)
+        conditions = [[] for _ in range(6)]
+
+        for j in range(cp):
+            feature_name = rl_i[j].split(' in ')[0]
+            feature_name = feature_name.replace('.', ' ')
+            feature_id = features_list.index(feature_name)
+            bmin = rl_i[j].split(' in ')[1].split(';')[0]
+            if bmin == '-Inf':
+                bmin = xmin[feature_id]
+            else:
+                bmin = float(bmin)
+            bmax = rl_i[j].split(' in ')[1].split(';')[1]
+            if bmax == 'Inf':
+                bmax = xmax[feature_id]
+            else:
+                bmax = float(bmax)
+
+            conditions[0] += [feature_name]
+            conditions[1] += [feature_id]
+            conditions[2] += [bmin]
+            conditions[3] += [bmax]
+            conditions[4] += [xmin[feature_id]]
+            conditions[5] += [xmax[feature_id]]
+
+        new_cond = HyperrectangleCondition(features_indexes=conditions[1], bmins=conditions[2], bmaxs=conditions[3],
+                                           features_names=conditions[0])
+        r_ruleset += Rule(new_cond)
+
+    return r_ruleset
+

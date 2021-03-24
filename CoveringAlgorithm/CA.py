@@ -1,29 +1,29 @@
-
 from typing import List, Callable
 import numpy as np
 from joblib import Parallel, delayed
-from sklearn.utils.validation import check_X_y, check_array
+from sklearn.utils.validation import check_X_y
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor,\
     GradientBoostingClassifier, RandomForestClassifier, AdaBoostRegressor, AdaBoostClassifier
 from CoveringAlgorithm import covering_tools as ct
 from CoveringAlgorithm import functions as f
-from CoveringAlgorithm.ruleset import RuleSet
-from CoveringAlgorithm.rule import Rule
+from ruleset.ruleset import RuleSet
+from rule.rule import Rule
+from rule.rule_utils import extract_rules_from_tree
 
 
-def eval_rules(rule: Rule, y: np.ndarray, X: np.ndarray):
+def eval_rules(rule: Rule, y: np.ndarray, xs: np.ndarray):
     """
     Parameters
     ----------
     rule: rule to evaluate
     y: variable of interest
-    X: features matrix
+    xs: features matrix
 
     Returns
     -------
     rule: rule evaluated on (X, y)
     """
-    rule.calc_stats(x=X, y=y)
+    rule.fit(xs=xs, y=y)
     return rule
 
 
@@ -66,26 +66,12 @@ class CA:
         self.selected_rs = RuleSet([])
         self.y = None
 
-    def _validate_X_predict(self, X: np.ndarray, check_input: bool = True):
-        """Validate X whenever one tries to predict"""
-        if check_input:
-            X = check_array(X, accept_sparse=True, force_all_finite='allow-nan')
-
-        n_features = X.shape[1]
-        if len(self.features) != n_features:
-            raise ValueError("Number of features of the model must "
-                             "match the input. Model n_features is %s and "
-                             "input n_features is %s "
-                             % (len(self.features), n_features))
-
-        return X
-
-    def fit(self, X: np.ndarray, y: np.ndarray, features: List[str] = None):
+    def fit(self, xs: np.ndarray, y: np.ndarray, features: List[str] = None):
         """
         Build a covering algorithm from the set (X, y).
         Parameters
         ----------
-        X : {array-like, sparse matrix} of shape (n_samples, n_features)
+        xs : {array-like, sparse matrix} of shape (n_samples, n_features)
             The training input samples. Internally, its dtype will be converted
             to ``dtype=np.float32``. If a sparse matrix is provided, it will be
             converted into a sparse ``csc_matrix``.
@@ -98,22 +84,22 @@ class CA:
         -------
         self : object
         """
-        X, y = check_X_y(X, y, ensure_min_samples=10, accept_sparse=True,
-                         force_all_finite='allow-nan', y_numeric=True)
+        xs, y = check_X_y(xs, y, ensure_min_samples=10, accept_sparse=True,
+                          force_all_finite='allow-nan', y_numeric=True)
         self.y = y
 
-        x_min = X.min(axis=0)
-        x_max = X.max(axis=0)
+        x_min = xs.min(axis=0)
+        x_max = xs.max(axis=0)
         if features is None:
-            self.features = ['feature_' + str(col) for col in range(0, X.shape[1])]
+            self.features = ['feature_' + str(col) for col in range(0, xs.shape[1])]
         else:
             self.features = features
         nb_estimator = int(np.ceil(self.max_rules/self.tree_size))
 
         self.set_rule_generator(nb_estimator, self.subsample, self.mode)
-        self.rules_generator.fit(X, y)
+        self.rules_generator.fit(xs, y)
         self.extract_rules(x_min, x_max)
-        self.eval_rules(X, y)
+        self.eval_rules(xs, y)
         self.select_rules(y)
 
         return self
@@ -124,14 +110,14 @@ class CA:
         else:
             tree_list = self.rules_generator.estimators_
         for tree in tree_list:
-            self.rules_list += ct.extract_rules_from_tree(tree, self.features, x_min, x_max)
+            self.rules_list += extract_rules_from_tree(tree, xmins=x_min, xmaxs=x_max, features_names=self.features)
 
-    def eval_rules(self, X: np.ndarray, y: np.ndarray):
+    def eval_rules(self, xs: np.ndarray, y: np.ndarray):
         self.rules_list = Parallel(n_jobs=self.n_jobs, backend="multiprocessing")(
-            delayed(eval_rules)(rule, y, X) for rule in self.rules_list)
+            delayed(eval_rules)(rule, y, xs) for rule in self.rules_list)
 
     def select_rules(self, y: np.ndarray):
-        sub_rulelist = list(filter(lambda rule: rule.length <= self.l_max, self.rules_list))
+        sub_rulelist = list(filter(lambda rule: len(rule) <= self.l_max, self.rules_list))
         sigma = self.get_sigma(len(y))
         self.selected_rs = ct.find_covering(sub_rulelist, y, sigma,
                                             self.alpha, self.gamma)
@@ -143,7 +129,6 @@ class CA:
                                                                  max_leaf_nodes=self.tree_size,
                                                                  learning_rate=self.learning_rate,
                                                                  subsample=subsample,
-
                                                                  random_state=self.seed,
                                                                  max_depth=100)
             elif mode.lower() in ['classification', 'classif', 'c']:
@@ -177,33 +162,35 @@ class CA:
                              "RandomForest, GradientBoosting and AdBoost!")
 
     def get_sigma(self, n_train: int):
-        sigma = np.nanmin([r.var if r.cov > n_train ** (-self.alpha) else np.nan
+        sigma = np.nanmin([r.std**2 if r.coverage > n_train ** (-self.alpha) else np.nan
                            for r in self.rules_list])
         return sigma
 
-    def predict(self, X: np.ndarray, y: np.ndarray = None):
+    def predict(self, xs: np.ndarray):
         """
         Predict regression target for X.
         The predicted regression target of an input sample is computed as the
         mean predicted regression targets of the trees in the forest.
         Parameters
         ----------
-        X : {array-like, sparse matrix} of shape (n_samples, n_features)
+        xs : {array-like, sparse matrix} of shape (n_samples, n_features)
             The input samples. Internally, its dtype will be converted to
             ``dtype=np.float32``. If a sparse matrix is provided, it will be
             converted into a sparse ``csr_matrix``.
-        y : array-like of shape (n_samples,) or (n_samples, n_outputs)
-            The target values real numbers in regression used to calculate the conditional
-            expectation in the generated partition.
+
         Returns
         -------
-        y : ndarray of shape (n_samples,) or (n_samples, n_outputs)
-            The predicted values.
+        prediction_vector : ndarray of shape (n_samples,) or (n_samples, n_outputs)
+                            The predicted values.
         """
         f.check_is_fitted(self)
         # Check data
-        X = self._validate_X_predict(X)
-        if y is None:
-            y = self.y
-        prediction_vector = ct.calc_pred(self.selected_rs, y, X)
-        return prediction_vector
+        n_features = xs.shape[1]
+        if len(self.features) != n_features:
+            raise ValueError("Number of features of the model must "
+                             "match the input. Model n_features is %s and "
+                             "input n_features is %s "
+                             % (len(self.features), n_features))
+        else:
+            prediction_vector = ct.calc_prediction(self.selected_rs, self.y, xs)
+            return prediction_vector

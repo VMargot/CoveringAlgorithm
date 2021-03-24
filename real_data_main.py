@@ -16,25 +16,14 @@ import rulefit
 
 import CoveringAlgorithm.CA as CA
 import CoveringAlgorithm.covering_tools as ct
-from CoveringAlgorithm.ruleset import RuleSet
+from CoveringAlgorithm.functions import make_rs_from_r, extract_rules_rulefit
+from Data.load_data import load_data, target_dict
+from ruleset.ruleset import RuleSet
+from rule.rule_utils import extract_rules_from_tree
 
 
 import warnings
 warnings.filterwarnings("ignore")
-
-target_dict = {'student_mat': 'G3',
-               'student_por': 'G3',
-               'student_mat_easy': 'G3',
-               'student_por_easy': 'G3',
-               'boston': 'MEDV',
-               'bike_hour': 'cnt',
-               'bike_day': 'cnt',
-               'mpg': 'mpg',
-               'machine': 'ERP',
-               'abalone': 'Rings',
-               'prostate': 'lpsa',
-               'ozone': 'ozone',
-               'diabetes': 'Y'}
 
 racine_path = dirname(__file__)
 
@@ -43,69 +32,6 @@ pathx_test = join(racine_path, 'X_test.csv')
 pathy = join(racine_path, 'Y.csv')
 pathr = join(racine_path, 'main.r')
 r_script = '/usr/bin/Rscript'
-
-
-def load_data(name: str):
-    """
-    Parameters
-    ----------
-    name: a chosen data set
-
-    Returns
-    -------
-    data: a pandas DataFrame
-    """
-    if 'student' in name:
-        if 'student_por' in name:
-            data = pd.read_csv(join(racine_path, 'Data/Student/student-por.csv'),
-                               sep=';')
-        elif 'student_mat' in name:
-            data = pd.read_csv(join(racine_path, 'Data/Student/student-mat.csv'),
-                               sep=';')
-        else:
-            raise ValueError('Not tested dataset')
-        # Covering Algorithm allow only numerical features.
-        # We can only convert binary qualitative features.
-        data['sex'] = [1 if x == 'F' else 0 for x in data['sex'].values]
-        data['Pstatus'] = [1 if x == 'A' else 0 for x in data['Pstatus'].values]
-        data['famsize'] = [1 if x == 'GT3' else 0 for x in data['famsize'].values]
-        data['address'] = [1 if x == 'U' else 0 for x in data['address'].values]
-        data['school'] = [1 if x == 'GP' else 0 for x in data['school'].values]
-        data = data.replace('yes', 1)
-        data = data.replace('no', 0)
-
-        if 'easy' not in data_name:
-            # For an harder exercise drop G1 and G2
-            data = data.drop(['G1', 'G2'], axis=1)
-
-    elif name == 'bike_hour':
-        data = pd.read_csv(join(racine_path, 'Data/BikeSharing/hour.csv'), index_col=0)
-        data = data.set_index('dteday')
-    elif name == 'bike_day':
-        data = pd.read_csv(join(racine_path, 'Data/BikeSharing/day.csv'), index_col=0)
-        data = data.set_index('dteday')
-    elif name == 'mpg':
-        data = pd.read_csv(join(racine_path, 'Data/MPG/mpg.csv'))
-    elif name == 'machine':
-        data = pd.read_csv(join(racine_path, 'Data/Machine/machine.csv'))
-    elif name == 'abalone':
-        data = pd.read_csv(join(racine_path, 'Data/Abalone/abalone.csv'))
-    elif name == 'ozone':
-        data = pd.read_csv(join(racine_path, 'Data/Ozone/ozone.csv'))
-    elif name == 'prostate':
-        data = pd.read_csv(join(racine_path, 'Data/Prostate/prostate.csv'), index_col=0)
-    elif name == 'diabetes':
-        data = pd.read_csv(join(racine_path, 'Data/Diabetes/diabetes.csv'), index_col=0)
-    elif name == 'boston':
-        from sklearn.datasets import load_boston
-        boston_dataset = load_boston()
-        data = pd.DataFrame(boston_dataset.data, columns=boston_dataset.feature_names)
-        data['MEDV'] = boston_dataset.target
-    else:
-        raise ValueError('Not tested dataset')
-
-    return data.dropna()
-
 
 if __name__ == '__main__':
     test_size = 0.3
@@ -121,12 +47,12 @@ if __name__ == '__main__':
     lmax = 3
     learning_rate = 0.1
 
-    nb_simu = 10
+    nb_simu = 2
     res_dict = {}
     #  Data parameters
     seed = 42
-    for data_name in ['prostate', 'diabetes', 'prostate', 'ozone',
-                      'machine', 'mpg', 'boston', 'student_por', 'abalone']:
+    for data_name in ['prostate', 'diabetes', 'ozone', 'machine', 'mpg',
+                      'boston', 'student_por', 'abalone']:
         print('')
         print('===== ', data_name.upper(), ' =====')
 
@@ -181,10 +107,10 @@ if __name__ == '__main__':
             rules_sirus = pd.read_csv(join(racine_path, 'sirus_rules.csv'))
             rules_nh = pd.read_csv(join(racine_path, 'nh_rules.csv'))
 
-            sirus_rs = ct.make_rs_from_r(rules_sirus, features.to_list(), X_train.min(axis=0),
-                                         X_train.max(axis=0))
-            nh_rs = ct.make_rs_from_r(rules_nh, features.to_list(), X_train.min(axis=0),
+            sirus_rs = make_rs_from_r(rules_sirus, features.to_list(), X_train.min(axis=0),
                                       X_train.max(axis=0))
+            nh_rs = make_rs_from_r(rules_nh, features.to_list(), X_train.min(axis=0),
+                                   X_train.max(axis=0))
             nh_rs = RuleSet(nh_rs[:-1])
 
             # Normalization of the error
@@ -196,18 +122,18 @@ if __name__ == '__main__':
             tree = DecisionTreeRegressor(max_leaf_nodes=10, random_state=seed)
             tree.fit(X_train, y_train)
 
-            tree_rules = ct.extract_rules_from_tree(tree, features, X_train.min(axis=0),
-                                                    X_train.max(axis=0), get_leaf=True)
+            tree_rules = extract_rules_from_tree(tree, xmins=X_train.min(axis=0), xmaxs=X_train.max(axis=0),
+                                                 features_names=features, get_leaf=True)
             tree_rs = RuleSet(tree_rules)
 
-            # ## Random Forests generation
+            # Random Forests generation
             regr_rf = RandomForestRegressor(n_estimators=1000, random_state=seed)
             regr_rf.fit(X_train, y_train)
 
             rf_rule_list = []
             for tree in regr_rf.estimators_:
-                rf_rule_list += ct.extract_rules_from_tree(tree, features, X_train.min(axis=0),
-                                                           X_train.max(axis=0), get_leaf=True)
+                rf_rule_list += extract_rules_from_tree(tree, xmins=X_train.min(axis=0), xmaxs=X_train.max(axis=0),
+                                                        features_names=features, get_leaf=True)
             rf_rs = RuleSet(rf_rule_list)
 
             seed += 1
@@ -218,7 +144,7 @@ if __name__ == '__main__':
                           generator_func=RandomForestRegressor,
                           lmax=lmax,
                           seed=seed)
-            ca_rf.fit(X=X_train, y=y_train, features=features)
+            ca_rf.fit(xs=X_train, y=y_train, features=features)
 
             seed += 1
             # ## Covering Algorithm GradientBoosting
@@ -229,7 +155,7 @@ if __name__ == '__main__':
                           lmax=lmax,
                           learning_rate=learning_rate,
                           seed=seed)
-            ca_gb.fit(X=X_train, y=y_train, features=features)
+            ca_gb.fit(xs=X_train, y=y_train, features=features)
 
             seed += 1
             # ## Covering Algorithm StochasicGradientBoosting
@@ -243,7 +169,7 @@ if __name__ == '__main__':
                            subsample=subsample,
                            learning_rate=learning_rate,
                            seed=seed)
-            ca_sgb.fit(X=X_train, y=y_train, features=features)
+            ca_sgb.fit(xs=X_train, y=y_train, features=features)
 
             seed += 1
             # ## RuleFit
@@ -263,9 +189,8 @@ if __name__ == '__main__':
             lin = lin[lin.coef != 0].sort_values(by="support")
             lin = lin.loc[lin['type'] == 'linear']
 
-            rulefit_rules = ct.extract_rules_rulefit(rules, features, X_train.min(axis=0),
-                                                     X_train.max(axis=0))
-            rulefit_rs = RuleSet(rulefit_rules)
+            rulefit_rs = extract_rules_rulefit(rules, features, X_train.min(axis=0),
+                                               X_train.max(axis=0))
 
             #  ## Errors calculation
             pred_tree = tree.predict(X_test)
@@ -284,74 +209,76 @@ if __name__ == '__main__':
             mse_sirus = np.mean((y_test - pred_sirus) ** 2) / deno_mse
             mse_nh = np.mean((y_test - pred_nh) ** 2) / deno_mse
 
-            cov_tree = tree_rs.calc_coverage(X_train)
-            cov_rf = rf_rs.calc_coverage(X_train)
-            cov_CA_rf = ca_rf.selected_rs.calc_coverage()
-            cov_CA_gb = ca_gb.selected_rs.calc_coverage()
-            cov_CA_sgb = ca_sgb.selected_rs.calc_coverage()
-            cov_rulefit = rulefit_rs.calc_coverage(X_train)
-            cov_sirus = sirus_rs.calc_coverage(X_train)
-            cov_nh = nh_rs.calc_coverage(X_train)
+            cov_tree = tree_rs.calc_coverage_rate(X_train)
+            cov_rf = rf_rs.calc_coverage_rate(X_train)
+            cov_CA_rf = ca_rf.selected_rs.calc_coverage_rate()
+            cov_CA_gb = ca_gb.selected_rs.calc_coverage_rate()
+            cov_CA_sgb = ca_sgb.selected_rs.calc_coverage_rate()
+            cov_rulefit = rulefit_rs.calc_coverage_rate(X_train)
+
+            sirus_rs[0].calc_activation(X_train)
+            cov_sirus = sirus_rs.calc_coverage_rate(X_train)
+            cov_nh = nh_rs.calc_coverage_rate(X_train)
 
             seed += 1
 
             if i == 0:
-                res_dict['DT'] = [[len(tree_rules), cov_tree, ct.inter(tree_rules),
+                res_dict['DT'] = [[len(tree_rules), cov_tree, ct.interpretability_index(tree_rules),
                                    r2_score(y_test, pred_tree), mse_tree]]
-                res_dict['RF'] = [[len(rf_rule_list), cov_rf, ct.inter(rf_rule_list),
+                res_dict['RF'] = [[len(rf_rule_list), cov_rf, ct.interpretability_index(rf_rule_list),
                                    r2_score(y_test, pred_rf), mse_rf]]
                 res_dict['CA_RF'] = [[len(ca_rf.selected_rs), cov_CA_rf,
-                                      ct.inter(ca_rf.selected_rs),  r2_score(y_test, pred_CA_rf),
+                                      ct.interpretability_index(ca_rf.selected_rs), r2_score(y_test, pred_CA_rf),
                                       mse_CA_rf]]
                 res_dict['CA_GB'] = [[len(ca_gb.selected_rs), cov_CA_gb,
-                                      ct.inter(ca_gb.selected_rs), r2_score(y_test, pred_CA_gb),
+                                      ct.interpretability_index(ca_gb.selected_rs), r2_score(y_test, pred_CA_gb),
                                       mse_CA_gb]]
                 res_dict['CA_SGB'] = [[len(ca_sgb.selected_rs), cov_CA_sgb,
-                                      ct.inter(ca_sgb.selected_rs), r2_score(y_test, pred_CA_sgb),
-                                      mse_CA_sgb]]
-                res_dict['RuleFit'] = [[len(rulefit_rules), cov_rulefit,
-                                        ct.inter(rulefit_rules), r2_score(y_test, pred_rulefit),
+                                       ct.interpretability_index(ca_sgb.selected_rs), r2_score(y_test, pred_CA_sgb),
+                                       mse_CA_sgb]]
+                res_dict['RuleFit'] = [[len(rulefit_rs), cov_rulefit,
+                                        ct.interpretability_index(rulefit_rs), r2_score(y_test, pred_rulefit),
                                         mse_rulefit]]
-                res_dict['Sirus'] = [[len(sirus_rs), cov_sirus, ct.inter(sirus_rs),
+                res_dict['Sirus'] = [[len(sirus_rs), cov_sirus, ct.interpretability_index(sirus_rs),
                                       r2_score(y_test, pred_sirus), mse_sirus]]
-                res_dict['NH'] = [[len(nh_rs), cov_nh, ct.inter(nh_rs), r2_score(y_test, pred_nh),
+                res_dict['NH'] = [[len(nh_rs), cov_nh, ct.interpretability_index(nh_rs), r2_score(y_test, pred_nh),
                                    mse_nh]]
 
             else:
                 res_dict['DT'] = np.append(res_dict['DT'], [[len(tree_rules), cov_tree,
-                                                             ct.inter(tree_rules),
+                                                             ct.interpretability_index(tree_rules),
                                                              r2_score(y_test, pred_tree),
                                                              mse_tree]], axis=0)
                 res_dict['RF'] = np.append(res_dict['RF'], [[len(rf_rule_list), cov_rf,
-                                                             ct.inter(rf_rule_list),
+                                                             ct.interpretability_index(rf_rule_list),
                                                              r2_score(y_test, pred_rf),
                                                              mse_rf]], axis=0)
                 res_dict['CA_RF'] = np.append(res_dict['CA_RF'], [[len(ca_rf.selected_rs),
                                                                    cov_CA_rf,
-                                                                   ct.inter(ca_rf.selected_rs),
+                                                                   ct.interpretability_index(ca_rf.selected_rs),
                                                                    r2_score(y_test, pred_CA_rf),
                                                                    mse_CA_rf]], axis=0)
                 res_dict['CA_GB'] = np.append(res_dict['CA_GB'], [[len(ca_gb.selected_rs),
                                                                    cov_CA_gb,
-                                                                   ct.inter(ca_gb.selected_rs),
+                                                                   ct.interpretability_index(ca_gb.selected_rs),
                                                                    r2_score(y_test, pred_CA_gb),
                                                                    mse_CA_gb]], axis=0)
                 res_dict['CA_SGB'] = np.append(res_dict['CA_SGB'], [[len(ca_sgb.selected_rs),
                                                                      cov_CA_sgb,
-                                                                     ct.inter(ca_sgb.selected_rs),
+                                                                     ct.interpretability_index(ca_sgb.selected_rs),
                                                                      r2_score(y_test, pred_CA_sgb),
                                                                      mse_CA_sgb]], axis=0)
-                res_dict['RuleFit'] = np.append(res_dict['RuleFit'], [[len(rulefit_rules),
+                res_dict['RuleFit'] = np.append(res_dict['RuleFit'], [[len(rulefit_rs),
                                                                        cov_rulefit,
-                                                                       ct.inter(rulefit_rules),
+                                                                       ct.interpretability_index(rulefit_rs),
                                                                        r2_score(y_test,
                                                                                 pred_rulefit),
                                                                        mse_rulefit]], axis=0)
                 res_dict['Sirus'] = np.append(res_dict['Sirus'], [[len(sirus_rs), cov_sirus,
-                                                                   ct.inter(sirus_rs),
+                                                                   ct.interpretability_index(sirus_rs),
                                                                    r2_score(y_test, pred_sirus),
                                                                    mse_sirus]], axis=0)
-                res_dict['NH'] = np.append(res_dict['NH'], [[len(nh_rs), cov_nh, ct.inter(nh_rs),
+                res_dict['NH'] = np.append(res_dict['NH'], [[len(nh_rs), cov_nh, ct.interpretability_index(nh_rs),
                                                              r2_score(y_test, pred_nh),
                                                              mse_nh]], axis=0)
 
