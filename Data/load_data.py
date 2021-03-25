@@ -15,19 +15,20 @@ target_dict = {'student_mat': 'G3',
                'ozone': 'ozone',
                'diabetes': 'Y'}
 
-racine_path = dirname(__file__)
 
-
-def load_data(name: str):
+def load_data(name: str, racine_path: str = None):
     """
     Parameters
     ----------
     name: a chosen data set
+    racine_path : the racine path
 
     Returns
     -------
     data: a pandas DataFrame
     """
+    if racine_path is None:
+        racine_path = dirname(__file__)
     if 'student' in name:
         if 'student_por' in name:
             data = pd.read_csv(join(racine_path, 'Student/student-por.csv'),
