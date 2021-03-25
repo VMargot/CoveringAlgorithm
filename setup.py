@@ -11,6 +11,6 @@ setup(name='CoveringAlgorithm',
       author='Vincent Margot',
       author_email='vincent.margot@hotmail.fr',
       url='https://github.com/VMargot/CoveringAlgorithm',
-      packages=['CoveringAlgorithm'],
+      packages=['CoveringAlgorithm', 'Data'],
       install_requires=requirements,
       )
