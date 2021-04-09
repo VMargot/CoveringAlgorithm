@@ -6,9 +6,9 @@ from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor,\
     GradientBoostingClassifier, RandomForestClassifier, AdaBoostRegressor, AdaBoostClassifier
 from CoveringAlgorithm import covering_tools as ct
 from CoveringAlgorithm import functions as f
-from ruleset.ruleset import RuleSet
-from rule.rule import Rule
-from rule.rule_utils import extract_rules_from_tree
+from ruleskit.ruleset import RuleSet
+from ruleskit.rule import Rule
+from ruleskit.utils.rule_utils import extract_rules_from_tree
 
 
 def eval_rules(rule: Rule, y: np.ndarray, xs: np.ndarray):

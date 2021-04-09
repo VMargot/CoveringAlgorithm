@@ -12,8 +12,8 @@ import rulefit
 import CoveringAlgorithm.CA as CA
 import CoveringAlgorithm.covering_tools as ct
 from CoveringAlgorithm.functions import extract_rules_rulefit
-from ruleset.ruleset import RuleSet
-from rule.rule_utils import extract_rules_from_tree
+from ruleskit.ruleset import RuleSet
+from ruleskit.utils.rule_utils import extract_rules_from_tree
 
 import warnings
 warnings.filterwarnings("ignore")

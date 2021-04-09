@@ -3,10 +3,10 @@ import math
 from typing import List, Union, Tuple
 import numpy as np
 
-from CoveringAlgorithm.functions import calc_conditional_mean
-from ruleset.ruleset import RuleSet
-from rule.rule import Rule
-from rule.activation import Activation
+from ruleskit.utils.rfunctions import conditional_mean
+from ruleskit.ruleset import RuleSet
+from ruleskit.rule import Rule
+from ruleskit.activation import Activation
 
 
 def interpretability_index(rs: Union[RuleSet, List[Rule]]) -> int:
@@ -21,9 +21,9 @@ def union_test(rule: Rule, act: Activation, gamma=0.80):
     rule_activation = rule._activation
     intersect_vect = rule_activation & act
 
-    pts_inter = intersect_vect.sum_ones()
-    pts_act = act.sum_ones()
-    pts_rule = rule_activation.sum_ones()
+    pts_inter = intersect_vect.nones
+    pts_act = act.nones
+    pts_rule = rule_activation.nones
 
     ans = (pts_inter < gamma * pts_rule) and (pts_inter < gamma * pts_act)
 
@@ -139,7 +139,7 @@ def calc_prediction(rules_list: RuleSet, ytrain: np.ndarray, x: np.ndarray):
     activation_matrix = [rule.activation for rule in rules_list]
     activation_matrix = np.array(activation_matrix)
 
-    prediction_matrix = [rule.calc_activation(x).get_array() for rule in rules_list]
+    prediction_matrix = [rule.evaluate(x).raw for rule in rules_list]
     prediction_matrix = np.array(prediction_matrix).T
 
     no_activation_matrix = np.logical_not(prediction_matrix)
@@ -160,7 +160,7 @@ def calc_prediction(rules_list: RuleSet, ytrain: np.ndarray, x: np.ndarray):
     cells = ((dot_activation - no_activation_vector) > 0)
 
     # Calculation of the conditional expectation in each cell
-    prediction_vector = [calc_conditional_mean(act, ytrain) if sum(act) > 0 else
+    prediction_vector = [conditional_mean(act, ytrain) if sum(act) > 0 else
                          np.mean(ytrain) for act in cells]
     prediction_vector = np.array(prediction_vector)
     return prediction_vector

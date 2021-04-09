@@ -18,8 +18,8 @@ import CoveringAlgorithm.CA as CA
 import CoveringAlgorithm.covering_tools as ct
 from CoveringAlgorithm.functions import make_rs_from_r, extract_rules_rulefit
 from Data.load_data import load_data, target_dict
-from ruleset.ruleset import RuleSet
-from rule.rule_utils import extract_rules_from_tree
+from ruleskit.ruleset import RuleSet
+from ruleskit.utils.rule_utils import extract_rules_from_tree
 
 
 import warnings
@@ -180,14 +180,11 @@ if __name__ == '__main__':
             rule_fit.fit(X_train, y_train)
 
             # ### RuleFit rules part
-            rules = rule_fit.get_rules()
-            rules = rules[rules.coef != 0].sort_values(by="support")
-            rules = rules.loc[rules['type'] == 'rule']
-
+            model = rule_fit.get_rules()
+            model = model[model.coef != 0].sort_values(by="support")
+            rules = model.loc[model['type'] == 'rule']
             # ### RuleFit linear part
-            lin = rule_fit.get_rules()
-            lin = lin[lin.coef != 0].sort_values(by="support")
-            lin = lin.loc[lin['type'] == 'linear']
+            lin = model.loc[model['type'] == 'linear']
 
             rulefit_rs = extract_rules_rulefit(rules, features, X_train.min(axis=0),
                                                X_train.max(axis=0))
@@ -216,7 +213,6 @@ if __name__ == '__main__':
             cov_CA_sgb = ca_sgb.selected_rs.calc_coverage_rate()
             cov_rulefit = rulefit_rs.calc_coverage_rate(X_train)
 
-            sirus_rs[0].calc_activation(X_train)
             cov_sirus = sirus_rs.calc_coverage_rate(X_train)
             cov_nh = nh_rs.calc_coverage_rate(X_train)
 
