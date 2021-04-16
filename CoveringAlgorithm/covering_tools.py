@@ -4,9 +4,9 @@ from typing import List, Union, Tuple
 import numpy as np
 
 from ruleskit.utils.rfunctions import conditional_mean
-from ruleskit.ruleset import RuleSet
-from ruleskit.rule import Rule
-from ruleskit.activation import Activation
+from ruleskit import RuleSet
+from ruleskit import Rule
+from ruleskit import Activation
 
 
 def interpretability_index(rs: Union[RuleSet, List[Rule]]) -> int:

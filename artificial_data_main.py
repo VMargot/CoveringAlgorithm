@@ -12,7 +12,7 @@ import rulefit
 import CoveringAlgorithm.CA as CA
 import CoveringAlgorithm.covering_tools as ct
 from CoveringAlgorithm.functions import extract_rules_rulefit
-from ruleskit.ruleset import RuleSet
+from ruleskit import RuleSet
 from ruleskit.utils.rule_utils import extract_rules_from_tree
 
 import warnings

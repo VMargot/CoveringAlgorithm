@@ -18,8 +18,8 @@ import CoveringAlgorithm.CA as CA
 import CoveringAlgorithm.covering_tools as ct
 from CoveringAlgorithm.functions import make_rs_from_r, extract_rules_rulefit
 from Data.load_data import load_data, target_dict
-from ruleskit.ruleset import RuleSet
-from ruleskit.utils.rule_utils import extract_rules_from_tree
+from ruleskit import RuleSet
+from ruleskit import extract_rules_from_tree
 
 
 import warnings

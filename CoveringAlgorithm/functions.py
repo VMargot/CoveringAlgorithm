@@ -2,9 +2,9 @@ from typing import List
 import numpy as np
 import pandas as pd
 from sklearn.exceptions import NotFittedError
-from ruleskit.rule import Rule
-from ruleskit.ruleset import RuleSet
-from ruleskit.condition import HyperrectangleCondition
+from ruleskit import Rule
+from ruleskit import RuleSet
+from ruleskit import HyperrectangleCondition
 
 
 def check_is_fitted(estimator):
