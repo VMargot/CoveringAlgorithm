@@ -164,25 +164,36 @@ def extract_rules_rulefit(
                 if "feature_" in sub_rule[0]:
                     feat_id = sub_rule[0].split("_")[-1]
                     feat_id = int(feat_id)
-                    features_names += [features_names_list[feat_id]]
                 else:
-                    features_names += [sub_rule[0]]
                     feat_id = features_names_list.index(sub_rule[0])
-                features_indexes += [feat_id]
-                bmins += [float(sub_rule[-1])]
-                bmaxs += [bmaxs_list[feat_id]]
+
+                if feat_id in features_indexes:
+                    duplicated_id = features_indexes.index(feat_id)
+                    if bmins[duplicated_id] > float(sub_rule[-1]):
+                        bmins[duplicated_id] = float(sub_rule[-1])
+                else:
+                    features_names += [features_names_list[feat_id]]
+                    features_indexes += [feat_id]
+                    bmins += [float(sub_rule[-1])]
+                    bmaxs += [bmaxs_list[feat_id]]
+
             else:
                 sub_rule = sub_rule.split(" < ")
                 if "feature_" in sub_rule[0]:
                     feat_id = sub_rule[0].split("_")[-1]
                     feat_id = int(feat_id)
-                    features_names += [features_names_list[feat_id]]
                 else:
-                    features_names += [sub_rule[0]]
                     feat_id = features_names_list.index(sub_rule[0])
-                features_indexes += [feat_id]
-                bmaxs += [float(sub_rule[-1])]
-                bmins += [bmins_list[feat_id]]
+
+                if feat_id in features_indexes:
+                    duplicated_id = features_indexes.index(feat_id)
+                    if bmaxs[duplicated_id] > float(sub_rule[-1]):
+                        bmaxs[duplicated_id] = float(sub_rule[-1])
+                else:
+                    features_names += [features_names_list[feat_id]]
+                    features_indexes += [feat_id]
+                    bmaxs += [float(sub_rule[-1])]
+                    bmins += [bmins_list[feat_id]]
 
         new_cond = HyperrectangleCondition(
             features_names=features_names,
@@ -219,11 +230,17 @@ def make_rs_from_r(
                 bmax = xmax[feature_id]
             else:
                 bmax = float(bmax)
-
-            conditions[0] += [feature_id]
-            conditions[1] += [bmin]
-            conditions[2] += [bmax]
-            conditions[3] += [feature_name]
+            if feature_id in conditions[0]:
+                duplicated_id = conditions[0].index(feature_id)
+                if conditions[1][duplicated_id] < bmin:
+                    conditions[1][duplicated_id] = bmin
+                if conditions[2][duplicated_id] > bmax:
+                    conditions[2][duplicated_id] = bmax
+            else:
+                conditions[0] += [feature_id]
+                conditions[1] += [bmin]
+                conditions[2] += [bmax]
+                conditions[3] += [feature_name]
 
         new_cond = HyperrectangleCondition(
             features_indexes=conditions[0],
