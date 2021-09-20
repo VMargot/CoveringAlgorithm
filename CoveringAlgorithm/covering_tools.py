@@ -62,14 +62,14 @@ def select_rules(
     nb_rules = len(rules_list)
 
     for i in range(id_rule, nb_rules):
-        if selected_rs.calc_coverage_rate() == 1.0:
+        if selected_rs.coverage == 1.0:
             break
         rs_copy = copy.deepcopy(selected_rs)
         new_rules = rules_list[i]
         # Test union criteria for each rule in the current selected RuleSet
         # noinspection PyProtectedMember
         utest = [union_test(new_rules, rule._activation, gamma) for rule in rs_copy]
-        if all(utest) and union_test(new_rules, selected_rs.get_activation(), gamma):
+        if all(utest) and union_test(new_rules, selected_rs._activation, gamma):
             selected_rs += new_rules
     return selected_rs
 
@@ -87,7 +87,7 @@ def get_significant(
     )
 
     significant_rules = list(filtered_rules)
-    [setattr(rule, "significant", True) for rule in significant_rules]
+    # [setattr(rule, "significant", True) for rule in significant_rules]
 
     if len(significant_rules) > 0:
         significant_rules = sorted(
@@ -111,7 +111,7 @@ def add_insignificant_rules(rules_list, rs, epsilon, sigma2, gamma):
         lambda rule: is_insignificant(rule, epsilon, sigma2), rules_list
     )
     insignificant_rules = list(insignificant_rules)
-    [setattr(rule, "significant", False) for rule in insignificant_rules]
+    # [setattr(rule, "significant", False) for rule in insignificant_rules]
 
     if len(insignificant_rules) > 0:
         insignificant_rs = sorted(
@@ -153,7 +153,7 @@ def find_covering(
         sub_rules_list, np.mean(y), beta, gamma, sigma2
     )
 
-    if significant_selected_rs.calc_coverage_rate() < 1.0:
+    if significant_selected_rs.coverage < 1.0:
         sub_rules_list = list(
             filter(lambda r: r not in significant_rules, sub_rules_list)
         )
